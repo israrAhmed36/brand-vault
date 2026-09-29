@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Modules\ActivityLog\Models\ActivityLog;
+use App\Modules\ActivityLog\Policies\ActivityLogPolicy;
+use App\Modules\ActivityLog\Repositories\ActivityLogRepository;
+use App\Modules\ActivityLog\Repositories\ActivityLogRepositoryInterface;
 use App\Modules\Asset\Models\Asset;
 use App\Modules\Asset\Policies\AssetPolicy;
 use App\Modules\Asset\Repositories\AssetRepository;
@@ -28,6 +32,7 @@ class ModuleServiceProvider extends ServiceProvider
         $this->app->bind(BrandRepositoryInterface::class, BrandRepository::class);
         $this->app->bind(FolderRepositoryInterface::class, FolderRepository::class);
         $this->app->bind(AssetRepositoryInterface::class, AssetRepository::class);
+        $this->app->bind(ActivityLogRepositoryInterface::class, ActivityLogRepository::class);
     }
 
     public function boot(): void
@@ -35,6 +40,7 @@ class ModuleServiceProvider extends ServiceProvider
         Gate::policy(Brand::class, BrandPolicy::class);
         Gate::policy(Folder::class, FolderPolicy::class);
         Gate::policy(Asset::class, AssetPolicy::class);
+        Gate::policy(ActivityLog::class, ActivityLogPolicy::class);
 
         Route::middleware('web')
             ->group(base_path('app/Modules/Auth/routes.php'));
@@ -47,5 +53,8 @@ class ModuleServiceProvider extends ServiceProvider
 
         Route::middleware('web')
             ->group(base_path('app/Modules/Asset/routes.php'));
+
+        Route::middleware('web')
+            ->group(base_path('app/Modules/ActivityLog/routes.php'));
     }
 }

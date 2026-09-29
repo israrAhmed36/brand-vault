@@ -9,6 +9,7 @@ class AssetTrashBulkService
 {
     public function __construct(
         private readonly AssetService $assets,
+        private readonly AssetTrashService $trash,
     ) {}
 
     /**
@@ -27,7 +28,7 @@ class AssetTrashBulkService
                 }
 
                 abort_unless($user->can('restore', $asset), 403);
-                $this->assets->restore($user, $asset);
+                $this->trash->restore($user, $asset);
                 $restoredCount++;
             }
         });
@@ -51,7 +52,7 @@ class AssetTrashBulkService
                 }
 
                 abort_unless($user->can('forceDelete', $asset), 403);
-                $this->assets->forceDelete($user, $asset);
+                $this->trash->forceDelete($user, $asset);
                 $deletedCount++;
             }
         });
