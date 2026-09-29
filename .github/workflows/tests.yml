@@ -1,0 +1,59 @@
+name: tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Application
+        run: |
+          composer install --no-interaction --prefer-dist --optimize-autoloader
+          cp .env.example .env
+          # CI uses SQLite; local/prod default remains PostgreSQL in .env.example
+          php -r "
+            \$env = file_get_contents('.env');
+            \$env = preg_replace('/^DB_CONNECTION=.*/m', 'DB_CONNECTION=sqlite', \$env);
+            \$env = preg_replace('/^DB_HOST=.*/m', '# DB_HOST=127.0.0.1', \$env);
+            \$env = preg_replace('/^DB_PORT=.*/m', '# DB_PORT=5432', \$env);
+            \$env = preg_replace('/^DB_DATABASE=.*/m', 'DB_DATABASE=database/database.sqlite', \$env);
+            \$env = preg_replace('/^DB_USERNAME=.*/m', '# DB_USERNAME=', \$env);
+            \$env = preg_replace('/^DB_PASSWORD=.*/m', '# DB_PASSWORD=', \$env);
+            file_put_contents('.env', \$env);
+          "
+          touch database/database.sqlite
+          php artisan key:generate
+          php artisan migrate --force
+          pnpm install
+          pnpm run build
+
+      - name: Run CI Checks
+        run: composer ci:check

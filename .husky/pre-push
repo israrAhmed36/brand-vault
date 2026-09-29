@@ -1,0 +1,224 @@
+#!/bin/sh
+
+set -e
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+cd "$REPO_ROOT"
+
+# Git sends ref lines on stdin for pre-push; consume them so the hook does not hang
+cat >/dev/null
+
+TEMP_LOG=$(mktemp)
+TEMP_FILE_LIST=""
+cleanup() {
+  rm -f "$TEMP_LOG"
+  if [ -n "$TEMP_FILE_LIST" ]; then
+    rm -f "$TEMP_FILE_LIST"
+  fi
+}
+trap cleanup EXIT
+
+# Compare against upstream tracking branch, else origin/main, else previous commit
+REMOTE_REF=$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)
+if [ -z "$REMOTE_REF" ]; then
+  if git rev-parse --verify origin/main >/dev/null 2>&1; then
+    REMOTE_REF="origin/main"
+  elif git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+    REMOTE_REF="HEAD~1"
+  fi
+fi
+
+reset_log() {
+  : > "$TEMP_LOG"
+}
+
+fail_with_log() {
+  title="$1"
+  echo ""
+  echo "❌ $title - Push blocked!"
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━ Output ━━━━━━━━━━━━━━━━━━"
+  cat "$TEMP_LOG"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "🚫 PUSH ABORTED"
+  exit 1
+}
+
+# Files changed vs remote (commits being pushed)
+if [ -n "$REMOTE_REF" ]; then
+  CHANGED_FILES=$(git diff "$REMOTE_REF"...HEAD --name-only --diff-filter=ACMR 2>/dev/null || git diff "$REMOTE_REF" --name-only --diff-filter=ACMR || true)
+else
+  CHANGED_FILES=$(git ls-files || true)
+fi
+
+CHANGED_JS_TS=$(
+  echo "$CHANGED_FILES" \
+    | grep -E '^resources/js/.*\.(js|jsx|ts|tsx)$' \
+    | grep -v -E '^resources/js/(actions|routes|wayfinder)/' \
+    | grep -v -E '^resources/js/components/ui/' \
+    || true
+)
+
+CHANGED_FRONTEND=$(
+  echo "$CHANGED_FILES" \
+    | grep -E '^(resources/(js|css)/|vite\.config\.|tsconfig\.json|package\.json|pnpm-lock\.yaml)' \
+    || true
+)
+
+CHANGED_PHP=$(
+  echo "$CHANGED_FILES" \
+    | grep -E '\.php$' \
+    | grep -v -E '^(vendor/|bootstrap/cache/|storage/)' \
+    || true
+)
+
+CHANGED_BACKEND=$(
+  echo "$CHANGED_FILES" \
+    | grep -E '^(app/|bootstrap/|config/|database/|routes/|tests/|composer\.(json|lock)|phpstan\.neon|pint\.json|phpunit\.xml)' \
+    || true
+)
+
+if [ -n "$CHANGED_PHP" ]; then
+  CHANGED_BACKEND=$(printf '%s\n%s\n' "$CHANGED_BACKEND" "$CHANGED_PHP" | awk 'NF' | sort -u)
+fi
+
+reset_log
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🚀 Running Laravel pre-push checks..."
+echo "⚠️  Push will be BLOCKED if any errors or warnings are found"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+if [ -n "$REMOTE_REF" ]; then
+  echo "🔍 Comparing against: $REMOTE_REF"
+else
+  echo "🔍 Comparing against: (full project — no upstream yet)"
+fi
+echo ""
+
+# ─── [1/4] Frontend build ───────────────────────────────────────────
+if [ -n "$CHANGED_FRONTEND" ]; then
+  echo "📦 [1/4] Building frontend (Vite)..."
+
+  if [ ! -d "resources/js/routes" ] || [ ! -d "resources/js/actions" ]; then
+    echo "   🧭 Generating Wayfinder routes..."
+    if ! php artisan wayfinder:generate --with-form >"$TEMP_LOG" 2>&1; then
+      fail_with_log "WAYFINDER GENERATE FAILED"
+    fi
+  fi
+
+  if ! pnpm build >"$TEMP_LOG" 2>&1; then
+    fail_with_log "FRONTEND BUILD FAILED"
+  fi
+  echo "✅ Frontend build passed"
+else
+  echo "📦 [1/4] Skipping frontend build (no frontend changes)"
+fi
+reset_log
+echo ""
+
+# ─── [2/4] Lint ─────────────────────────────────────────────────────
+echo "🔍 [2/4] Linting changed files..."
+
+LINT_FAILED=0
+
+if [ -n "$CHANGED_JS_TS" ]; then
+  FILE_COUNT=$(echo "$CHANGED_JS_TS" | awk 'NF' | wc -l | tr -d ' ')
+  echo "   Linting $FILE_COUNT Inertia/React file(s)..."
+
+  TEMP_FILE_LIST=$(mktemp)
+
+  for file in $CHANGED_JS_TS; do
+    if [ -f "$file" ]; then
+      echo "$file" >> "$TEMP_FILE_LIST"
+    fi
+  done
+
+  if [ -s "$TEMP_FILE_LIST" ]; then
+    while IFS= read -r file; do
+      echo "   Linting $file..."
+      if ! pnpm exec vp check --no-fmt --no-error-on-unmatched-pattern "$file" >>"$TEMP_LOG" 2>&1; then
+        LINT_FAILED=1
+      fi
+    done < "$TEMP_FILE_LIST"
+  fi
+else
+  echo "   No resources/js files to lint"
+fi
+
+if [ -n "$CHANGED_PHP" ]; then
+  echo "   Checking PHP style with Pint..."
+  if ! vendor/bin/pint --parallel --test >>"$TEMP_LOG" 2>&1; then
+    LINT_FAILED=1
+  fi
+else
+  echo "   No PHP files to check with Pint"
+fi
+
+if [ "$LINT_FAILED" -eq 1 ]; then
+  fail_with_log "LINT FAILED"
+fi
+echo "✅ Lint passed (no errors or warnings)"
+reset_log
+echo ""
+
+# ─── [3/4] Type checks ───────────────────────────────────────────────
+echo "🔎 [3/4] Running type checks..."
+
+TYPES_FAILED=0
+
+if [ -n "$CHANGED_FRONTEND" ]; then
+  echo "   TypeScript (tsc --noEmit)..."
+  if [ ! -d "resources/js/routes" ] || [ ! -d "resources/js/actions" ]; then
+    php artisan wayfinder:generate --with-form >/dev/null 2>&1 || true
+  fi
+  if ! pnpm types:check >>"$TEMP_LOG" 2>&1; then
+    TYPES_FAILED=1
+  fi
+else
+  echo "   Skipping TypeScript (no frontend changes)"
+fi
+
+if [ -n "$CHANGED_BACKEND" ]; then
+  echo "   PHPStan / Larastan..."
+  if ! vendor/bin/phpstan analyse --memory-limit=1G >>"$TEMP_LOG" 2>&1; then
+    TYPES_FAILED=1
+  fi
+else
+  echo "   Skipping PHPStan (no backend changes)"
+fi
+
+if [ "$TYPES_FAILED" -eq 1 ]; then
+  fail_with_log "TYPE CHECK FAILED"
+fi
+echo "✅ Type checks passed"
+reset_log
+echo ""
+
+# ─── [4/4] Tests ─────────────────────────────────────────────────────
+if [ -n "$CHANGED_BACKEND" ] || [ -n "$CHANGED_FRONTEND" ]; then
+  echo "🧪 [4/4] Running Laravel tests..."
+  if ! php artisan config:clear --ansi >"$TEMP_LOG" 2>&1; then
+    fail_with_log "CONFIG CLEAR FAILED"
+  fi
+  if ! php artisan test >>"$TEMP_LOG" 2>&1; then
+    fail_with_log "TESTS FAILED"
+  fi
+  echo "✅ Tests passed"
+else
+  echo "🧪 [4/4] Skipping tests (no app changes detected)"
+fi
+reset_log
+echo ""
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "✅ ALL PRE-PUSH CHECKS PASSED!"
+echo "   ✓ Frontend build"
+echo "   ✓ Lint clean (Vite+ + Pint)"
+echo "   ✓ Types valid (TypeScript + PHPStan)"
+echo "   ✓ Laravel tests passing"
+echo ""
+echo "🚀 Proceeding with push..."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""

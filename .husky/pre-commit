@@ -1,0 +1,106 @@
+#!/bin/sh
+
+set -e
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+cd "$REPO_ROOT"
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🛠  Running Laravel pre-commit checks..."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+echo "✨ Formatting staged files (Pint + Vite+)..."
+pnpm lint-staged
+echo "✅ Formatting complete"
+echo ""
+
+# App frontend only — skip Wayfinder-generated and shadcn UI scaffolds
+STAGED_JS_TS=$(
+  git diff --cached --name-only --diff-filter=ACMR \
+    | grep -E '^resources/js/.*\.(js|jsx|ts|tsx)$' \
+    | grep -v -E '^resources/js/(actions|routes|wayfinder)/' \
+    | grep -v -E '^resources/js/components/ui/' \
+    | grep -v -E '\.config\.(js|ts|mjs|cjs)$' \
+    || true
+)
+
+STAGED_PHP=$(
+  git diff --cached --name-only --diff-filter=ACMR \
+    | grep -E '\.php$' \
+    | grep -v -E '^(vendor/|bootstrap/cache/|storage/)' \
+    || true
+)
+
+if [ -n "$STAGED_JS_TS" ]; then
+  echo "🔍 Linting staged Inertia/React files (unused imports & constants)..."
+
+  TEMP_FILE_LIST=$(mktemp)
+  trap 'rm -f "$TEMP_FILE_LIST"' EXIT
+
+  for file in $STAGED_JS_TS; do
+    if [ -f "$file" ]; then
+      echo "$file" >> "$TEMP_FILE_LIST"
+    fi
+  done
+
+  if [ -s "$TEMP_FILE_LIST" ]; then
+    LINT_FAILED=0
+
+    while IFS= read -r file; do
+      echo "   Linting $file..."
+      if ! pnpm exec vp check --no-fmt --no-error-on-unmatched-pattern "$file"; then
+        LINT_FAILED=1
+      fi
+    done < "$TEMP_FILE_LIST"
+
+    if [ "$LINT_FAILED" -eq 1 ]; then
+      echo ""
+      echo "❌ Frontend lint failed!"
+      echo "   Fix unused imports, unused constants, and other lint issues."
+      exit 1
+    fi
+    echo "✅ Frontend lint passed"
+  else
+    echo "✅ No app JS/TS files to lint"
+  fi
+  echo ""
+
+  # Wayfinder routes/actions are gitignored but required by tsc
+  if [ ! -d "resources/js/routes" ] || [ ! -d "resources/js/actions" ]; then
+    echo "🧭 Generating Wayfinder TypeScript routes..."
+    php artisan wayfinder:generate --with-form
+    echo ""
+  fi
+
+  echo "🔍 Running TypeScript type check..."
+  if ! pnpm types:check; then
+    echo ""
+    echo "❌ TypeScript type check failed!"
+    echo "   Fix type errors, unused imports, and unused locals before committing."
+    exit 1
+  fi
+  echo "✅ TypeScript type check passed"
+  echo ""
+else
+  echo "ℹ️  No staged resources/js files — skipping frontend lint & types"
+  echo ""
+fi
+
+if [ -n "$STAGED_PHP" ]; then
+  echo "🔍 Checking PHP style with Pint..."
+  if ! vendor/bin/pint --parallel --test --dirty; then
+    echo ""
+    echo "❌ Pint found PHP style issues!"
+    echo "   Run: vendor/bin/pint --dirty"
+    exit 1
+  fi
+  echo "✅ Pint passed"
+  echo ""
+else
+  echo "ℹ️  No staged PHP files — skipping Pint check"
+  echo ""
+fi
+
+echo "✅ Pre-commit checks completed successfully"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

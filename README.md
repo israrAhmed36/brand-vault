@@ -4,7 +4,7 @@ Laravel + Inertia (React) application for managing brand assets.
 
 ## Stack
 
-- **Backend:** Laravel 13, PHP 8.3+, PostgreSQL
+- **Backend:** Laravel 13, PHP 8.4+, PostgreSQL
 - **Frontend:** React, Inertia, TypeScript, Vite+, Tailwind CSS
 - **Quality:** Husky hooks, Pint, PHPStan/Larastan, Vite+ lint, PHPUnit
 
@@ -26,10 +26,10 @@ pnpm dev
 
 ## Git hooks
 
-| Hook | What it enforces |
-|------|------------------|
+| Hook           | What it enforces                                                           |
+| -------------- | -------------------------------------------------------------------------- |
 | **pre-commit** | Pint (PHP), Vite+ format/lint on staged `resources/js`, TypeScript (`tsc`) |
-| **pre-push** | Frontend build, lint, TypeScript + PHPStan, Laravel tests |
+| **pre-push**   | Frontend build, lint, TypeScript + PHPStan, Laravel tests                  |
 
 After `pnpm install`, run `pnpm exec husky` once so hooks are registered.
 
