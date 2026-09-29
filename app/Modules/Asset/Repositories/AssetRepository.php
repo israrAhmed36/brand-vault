@@ -113,4 +113,17 @@ class AssetRepository implements AssetRepositoryInterface
         abort_unless($asset->trashed(), 404);
         $asset->forceDelete();
     }
+
+    public function updateAiSuggestionForUser(int $userId, Asset $asset, array $suggestion): Asset
+    {
+        abort_unless($asset->user_id === $userId, 403);
+
+        $asset->forceFill([
+            'tags' => $suggestion['tags'],
+            'ai_description' => $suggestion['description'],
+            'ai_usage_suggestion' => $suggestion['usage_suggestion'],
+        ])->save();
+
+        return $asset->refresh();
+    }
 }

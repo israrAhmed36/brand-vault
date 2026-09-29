@@ -1,14 +1,13 @@
 import { Head, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { AssetFormSheet } from '@/components/assets/asset-form-sheet';
-import { AssetMoveDialog } from '@/components/assets/asset-move-dialog';
 import { AssetTable } from '@/components/assets/asset-table';
+import { AssetsIndexDialogs } from '@/components/assets/assets-index-dialogs';
 import { AssetsPageHeader } from '@/components/assets/assets-page-header';
 import { AssetsPageShell } from '@/components/assets/assets-page-shell';
-import { FolderFormSheet } from '@/components/assets/folder-form-sheet';
 import { FolderTree } from '@/components/assets/folder-tree';
 import { SearchSortBar } from '@/components/assets/search-sort-bar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAssetAiTags } from '@/hooks/use-asset-ai-tags';
 import { useAssetsFiltering } from '@/hooks/use-assets-filtering';
 import { useAssetsListQuery } from '@/hooks/use-assets-list-query';
 import { useFolderSheet } from '@/hooks/use-folder-sheet';
@@ -17,40 +16,21 @@ import { moveAssetToFolder } from '@/lib/move-asset';
 import type { Asset, AssetsIndexPageProps } from '@/types/asset';
 
 export default function AssetsIndex() {
-    const {
-        assets,
-        folders,
-        folderOptions,
-        breadcrumbs,
-        currentFolder,
-        filters,
-    } = usePage<AssetsIndexPageProps>().props;
+    const page = usePage<AssetsIndexPageProps>().props;
     const { isLoading, error } = useAssetsFiltering();
-    const folderSheet = useFolderSheet(folders);
-    const listPath = currentFolder
-        ? `/assets/folder/${currentFolder.id}`
+    const folderSheet = useFolderSheet(page.folders);
+    const aiTags = useAssetAiTags();
+    const listPath = page.currentFolder
+        ? `/assets/folder/${page.currentFolder.id}`
         : '/assets';
     const { search, sort, setSearch, setSort } = useAssetsListQuery({
         listPath,
-        filters,
-        syncKey: currentFolder?.id ?? 'root',
+        filters: page.filters,
+        syncKey: page.currentFolder?.id ?? 'root',
     });
     const [assetSheetOpen, setAssetSheetOpen] = useState(false);
     const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
     const [movingAsset, setMovingAsset] = useState<Asset | null>(null);
-
-    async function handleAssetDrop(
-        assetId: number,
-        folderId: number | null,
-    ): Promise<void> {
-        const asset = assets.data.find((item) => item.id === assetId);
-
-        if (!asset || asset.folder_id === folderId) {
-            return;
-        }
-
-        await moveAssetToFolder(assetId, folderId);
-    }
 
     return (
         <>
@@ -58,43 +38,46 @@ export default function AssetsIndex() {
             <AssetsPageShell
                 sidebar={
                     <FolderTree
-                        folders={folders}
-                        currentFolderId={currentFolder?.id ?? null}
+                        folders={page.folders}
+                        currentFolderId={page.currentFolder?.id ?? null}
                         onCreateParent={folderSheet.openCreateParent}
                         onCreateChild={folderSheet.openCreateChild}
                         onRename={folderSheet.openRename}
                         onDelete={deleteFolder}
                         onMove={moveFolder}
                         onAssetDrop={(assetId, folderId) => {
-                            void handleAssetDrop(assetId, folderId);
+                            const asset = page.assets.data.find(
+                                (item) => item.id === assetId,
+                            );
+                            if (!asset || asset.folder_id === folderId) {
+                                return;
+                            }
+                            void moveAssetToFolder(assetId, folderId);
                         }}
                     />
                 }
             >
                 <AssetsPageHeader
                     activeTab="assets"
-                    breadcrumbs={breadcrumbs}
+                    breadcrumbs={page.breadcrumbs}
                     onAddAsset={() => {
                         setEditingAsset(null);
                         setAssetSheetOpen(true);
                     }}
                 />
-
                 {error ? (
                     <Alert variant="destructive">
                         <AlertDescription>{error}</AlertDescription>
                     </Alert>
                 ) : null}
-
                 <SearchSortBar
                     search={search}
                     sort={sort}
                     onSearchChange={setSearch}
                     onSortChange={setSort}
                 />
-
                 <AssetTable
-                    assets={assets.data}
+                    assets={page.assets.data}
                     isLoading={isLoading}
                     searchQuery={search}
                     onEdit={(asset) => {
@@ -102,43 +85,47 @@ export default function AssetsIndex() {
                         setAssetSheetOpen(true);
                     }}
                     onMove={setMovingAsset}
+                    onGenerateTags={(asset) => {
+                        void aiTags.openForAsset(asset);
+                    }}
                     onDelete={trashAsset}
                 />
             </AssetsPageShell>
-
-            <AssetFormSheet
-                key={
-                    editingAsset?.id ?? `create-${currentFolder?.id ?? 'root'}`
-                }
-                open={assetSheetOpen}
-                asset={editingAsset}
-                folderId={currentFolder?.id ?? null}
-                folderOptions={folderOptions}
-                onOpenChange={setAssetSheetOpen}
-            />
-
-            <AssetMoveDialog
-                key={movingAsset?.id ?? 'move-closed'}
-                open={movingAsset !== null}
-                asset={movingAsset}
-                folderOptions={folderOptions}
-                onOpenChange={(open) => {
+            <AssetsIndexDialogs
+                assetSheetOpen={assetSheetOpen}
+                editingAsset={editingAsset}
+                currentFolderId={page.currentFolder?.id ?? null}
+                folderOptions={page.folderOptions}
+                onAssetSheetOpenChange={setAssetSheetOpen}
+                movingAsset={movingAsset}
+                onMovingAssetOpenChange={(open) => {
                     if (!open) {
                         setMovingAsset(null);
                     }
                 }}
-            />
-
-            <FolderFormSheet
-                key={
-                    folderSheet.editingFolder?.id ??
-                    `create-under-${folderSheet.createParentId ?? 'root'}`
-                }
-                open={folderSheet.open}
-                parentId={folderSheet.createParentId}
-                parentName={folderSheet.createParentName}
-                folder={folderSheet.editingFolder}
-                onOpenChange={folderSheet.setOpen}
+                aiOpen={aiTags.open}
+                aiAssetName={aiTags.asset?.name ?? ''}
+                aiIsGenerating={aiTags.isGenerating}
+                aiIsSaving={aiTags.isSaving}
+                aiError={aiTags.error}
+                aiSuggestion={aiTags.suggestion}
+                onAiOpenChange={(open) => {
+                    if (!open) {
+                        aiTags.close();
+                    }
+                }}
+                onAiSuggestionChange={aiTags.setSuggestion}
+                onAiRegenerate={() => {
+                    void aiTags.regenerate();
+                }}
+                onAiSave={() => {
+                    void aiTags.save();
+                }}
+                folderSheetOpen={folderSheet.open}
+                createParentId={folderSheet.createParentId}
+                createParentName={folderSheet.createParentName}
+                editingFolder={folderSheet.editingFolder}
+                onFolderSheetOpenChange={folderSheet.setOpen}
             />
         </>
     );

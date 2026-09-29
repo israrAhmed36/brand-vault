@@ -17,7 +17,7 @@ use Illuminate\Support\Carbon;
  * @property int $user_id
  * @property int|null $folder_id
  * @property string $name
- * @property string $type
+ * @property AssetType $type
  * @property string $url
  * @property array<int, string>|null $tags
  * @property string|null $ai_description

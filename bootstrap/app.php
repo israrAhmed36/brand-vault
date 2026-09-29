@@ -2,6 +2,9 @@
 
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Modules\GenAI\Exceptions\AiProviderException;
+use App\Modules\GenAI\Exceptions\AiResponseInvalidException;
+use App\Shared\Http\ApiResponse;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -30,4 +33,25 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        $exceptions->render(function (AiResponseInvalidException $exception, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return ApiResponse::error(
+                    'AI_VALIDATION_ERROR',
+                    $exception->getMessage(),
+                    422,
+                    $exception->fields(),
+                );
+            }
+        });
+
+        $exceptions->render(function (AiProviderException $exception, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return ApiResponse::error(
+                    'AI_PROVIDER_ERROR',
+                    $exception->getMessage(),
+                    502,
+                );
+            }
+        });
     })->create();

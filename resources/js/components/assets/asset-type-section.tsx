@@ -17,6 +17,7 @@ export function AssetTypeSection({
     onEdit,
     onDelete,
     onMove,
+    onGenerateTags,
     onRestore,
     onForceDelete,
     trashSelection,
@@ -78,6 +79,7 @@ export function AssetTypeSection({
                             onEdit={onEdit}
                             onDelete={onDelete}
                             onMove={onMove}
+                            onGenerateTags={onGenerateTags}
                             onRestore={onRestore}
                             onForceDelete={onForceDelete}
                             trashSelection={trashSelection}

@@ -34,6 +34,11 @@ class FolderRepository implements FolderRepositoryInterface
             ->get();
     }
 
+    public function countForUser(int $userId): int
+    {
+        return Folder::query()->where('user_id', $userId)->count();
+    }
+
     public function createForUser(int $userId, array $attributes): Folder
     {
         return Folder::query()->create([

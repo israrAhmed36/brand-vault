@@ -4,6 +4,7 @@ namespace App\Modules\ActivityLog\Repositories;
 
 use App\Modules\ActivityLog\Models\ActivityLog;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class ActivityLogRepository implements ActivityLogRepositoryInterface
 {
@@ -48,5 +49,15 @@ class ActivityLogRepository implements ActivityLogRepositoryInterface
         $perPage = (int) ($filters['per_page'] ?? 20);
 
         return $query->paginate($perPage, ['*'], 'page', (int) ($filters['page'] ?? 1));
+    }
+
+    public function recentForUser(int $userId, int $limit = 8): Collection
+    {
+        return ActivityLog::query()
+            ->where('user_id', $userId)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->limit(max(1, $limit))
+            ->get();
     }
 }
