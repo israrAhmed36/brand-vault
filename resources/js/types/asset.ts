@@ -1,4 +1,7 @@
 import type { Folder, FolderBreadcrumb, FolderOption } from '@/types/folder';
+import type { TrashAssetSelection } from '@/types/trash-selection';
+
+export type { TrashAssetSelection } from '@/types/trash-selection';
 
 export type { FolderOption };
 
@@ -59,6 +62,9 @@ export type AssetTableProps = {
     onMove?: (asset: Asset) => void;
     onRestore?: (asset: Asset) => void;
     onForceDelete?: (asset: Asset) => void;
+    trashSelection?: TrashAssetSelection;
+    onBulkRestoreSelected?: () => void;
+    onBulkForceDeleteSelected?: () => void;
 };
 
 export type AssetCardProps = Pick<
@@ -69,6 +75,7 @@ export type AssetCardProps = Pick<
     | 'onMove'
     | 'onRestore'
     | 'onForceDelete'
+    | 'trashSelection'
 > & {
     asset: Asset;
 };
@@ -90,6 +97,20 @@ export type AssetMoveFolderListProps = {
 export type AssetTypeBadgeProps = {
     type: AssetType;
     overlay?: boolean;
+};
+
+export type AssetTypeSectionProps = Pick<
+    AssetTableProps,
+    | 'showRestore'
+    | 'onEdit'
+    | 'onDelete'
+    | 'onMove'
+    | 'onRestore'
+    | 'onForceDelete'
+    | 'trashSelection'
+> & {
+    type: AssetType;
+    assets: Asset[];
 };
 
 export type SearchSortBarProps = {

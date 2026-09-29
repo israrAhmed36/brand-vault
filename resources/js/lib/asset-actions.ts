@@ -46,3 +46,31 @@ export function forceDeleteAsset(asset: Asset): void {
         onError: () => toast.error('Could not delete asset.'),
     });
 }
+
+export function bulkRestoreAssets(
+    assetIds: number[],
+    onSuccess?: () => void,
+): void {
+    router.post(
+        '/trash/bulk-restore',
+        { asset_ids: assetIds },
+        {
+            preserveScroll: true,
+            onSuccess: () => onSuccess?.(),
+            onError: () => toast.error('Could not restore selected assets.'),
+        },
+    );
+}
+
+export function bulkForceDeleteAssets(
+    assetIds: number[],
+    onSuccess?: () => void,
+): void {
+    router.delete('/trash/bulk-destroy', {
+        data: { asset_ids: assetIds },
+        preserveScroll: true,
+        onSuccess: () => onSuccess?.(),
+        onError: () =>
+            toast.error('Could not permanently delete selected assets.'),
+    });
+}
