@@ -1,0 +1,41 @@
+---
+description: Laravel Form Requests, Eloquent usage, and PHP method style
+globs: app/**/*.php,routes/**/*.php
+alwaysApply: false
+---
+
+# Form Requests, Eloquent & PHP Style
+
+## Validation — Form Requests only
+
+- Never validate with `$request->validate()` inside controllers/services for HTTP input.
+- One Request class per action: `CreateAssetRequest`, `UpdateFolderRequest`, `ListAssetsRequest`.
+- Use `Rule::in([...])`, custom `BelongsToCurrentUser`, and clear messages.
+- Controllers type-hint the Request and use `$request->validated()` only.
+
+```php
+// ✅
+public function rules(): array
+{
+    return [
+        'name' => ['required', 'string', 'max:255'],
+        'type' => ['required', Rule::in(['image', 'video', 'document', 'link', 'other'])],
+        'folder_id' => ['nullable', 'exists:folders,id', new BelongsToCurrentUser('folders')],
+    ];
+}
+```
+
+## Eloquent
+
+- Prefer relationships (`$folder->assets()`, `$asset->folder`) over manual joins.
+- Use `SoftDeletes`; default lists exclude trash; trash uses `onlyTrashed()`.
+- Repositories accept `userId` and apply `where('user_id', $userId)` on every query.
+- Use eager loading (`with(...)`) to avoid N+1; never `Model::all()` without constraints.
+- Mass-assign via `$fillable` / `$guarded`; never `update($request->all())`.
+
+## Function definitions
+
+- Explicit return types and parameter types on all public methods.
+- Prefer early returns; avoid deep nesting.
+- Name methods as verbs: `create`, `softDelete`, `restoreToRootIfNeeded`.
+- Constructor property promotion for injected dependencies.

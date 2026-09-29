@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600" viewBox="0 0 1200 1600" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#18181b"/>
+      <stop offset="45%" stop-color="#27272a"/>
+      <stop offset="100%" stop-color="#3f3f46"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0.2" y1="0" x2="0.9" y2="1">
+      <stop offset="0%" stop-color="#fafafa" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#a1a1aa" stop-opacity="0.05"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1600" fill="url(#bg)"/>
+  <circle cx="980" cy="220" r="320" fill="url(#accent)"/>
+  <circle cx="180" cy="1280" r="420" fill="#52525b" fill-opacity="0.25"/>
+  <rect x="140" y="360" width="420" height="280" rx="28" fill="#fafafa" fill-opacity="0.06" stroke="#fafafa" stroke-opacity="0.12"/>
+  <rect x="620" y="520" width="360" height="220" rx="24" fill="#fafafa" fill-opacity="0.05" stroke="#fafafa" stroke-opacity="0.1"/>
+  <rect x="220" y="760" width="520" height="160" rx="24" fill="#fafafa" fill-opacity="0.04" stroke="#fafafa" stroke-opacity="0.08"/>
+  <circle cx="220" cy="430" r="18" fill="#fafafa" fill-opacity="0.35"/>
+  <circle cx="270" cy="430" r="18" fill="#a1a1aa" fill-opacity="0.45"/>
+  <circle cx="320" cy="430" r="18" fill="#71717a" fill-opacity="0.55"/>
+</svg>

@@ -1,0 +1,29 @@
+---
+description: Extra Laravel + React consistency rules for BrandVault
+globs: app/**/*.php,resources/js/**/*.{ts,tsx},routes/**/*.php,tests/**/*.php
+alwaysApply: false
+---
+
+# Laravel + React Consistency
+
+## Backend
+
+- Prefer constructor DI; never `app(Service::class)` inside methods unless resolving strategy/factories.
+- Authorize with `$this->authorize(...)` or Request `authorize()` before service calls.
+- Domain exceptions in `app/Modules/...` or `app/Shared/Exceptions`; map in the exception handler by `$request->wantsJson()`.
+- Feature tests cover cross-user isolation on both web and api routes.
+- Do not put module code in legacy `app/Http/Controllers` — use `app/Modules/{Module}/Controllers`.
+- Migrations are the schema source of truth; no ad-hoc SQL for app features.
+
+## Frontend
+
+- Colocate feature UI under `Components/{module}/` mirroring backend modules (`brand`, `assets`, `folders`).
+- Shared helpers in `lib/`; do not duplicate Axios/CSRF setup.
+- Show Laravel/Inertia `errors` field messages next to inputs; do not invent parallel client-only error models for server rules.
+- Avoid prop drilling beyond one level — use page props or small context only when needed.
+- No `any` in new TypeScript; prefer `unknown` + narrowing if needed.
+
+## Security
+
+- Never expose AI API keys or secrets to the React bundle.
+- Treat all client payloads as untrusted; re-validate AI suggestion shape on save server-side.

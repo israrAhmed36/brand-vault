@@ -1,0 +1,50 @@
+---
+description: API routes format and JSON response envelope from the BrandVault plan
+globs: routes/**/*.php,app/Modules/**/*Api*.php,app/Modules/**/Controllers/**/*.php,app/Shared/**/*.php
+alwaysApply: false
+---
+
+# Routes & API Response Format
+
+Match **§6** of `BrandVault-Project-Plan (1).md`. Do not invent alternate path styles.
+
+## Route split
+
+- **`routes/web.php` / module `routes.php` (web)**: Inertia pages + form mutations → redirect / `Inertia::render()`.
+- **`routes/api.php` / module API routes**: JSON only — live search, move, AI generate/save.
+
+### Canonical API paths (keep this shape)
+
+| Method | Path |
+|---|---|
+| GET | `/api/assets/search` |
+| PUT | `/api/assets/{asset}/move` |
+| POST | `/api/assets/{asset}/generate-tags` |
+| PUT | `/api/assets/{asset}/tags` |
+
+Web examples: `GET/PUT /brand`, `GET /assets`, `GET /assets/{folder}`, `POST/PUT/DELETE /folders`, `POST/PUT/DELETE /assets`, `POST /assets/{asset}/restore`, `GET /trash`.
+
+## JSON envelope (`api.php` only)
+
+Success:
+
+```json
+{ "success": true, "data": {}, "meta": { "pagination": { "page": 1, "per_page": 20, "total": 42 } } }
+```
+
+Error:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Human-readable summary.",
+    "fields": { "primary_color": ["Invalid hex format"] }
+  }
+}
+```
+
+- Use a shared responder/helper (e.g. `ApiResponse::success` / `ApiResponse::error`) — never ad-hoc JSON shapes.
+- Map domain exceptions: `403` authz, `404` missing, `409` folder not empty, `422` validation/AI schema, `429` throttle.
+- `web.php` does **not** use this envelope; use redirects, flashes, or Inertia `errors`.

@@ -1,0 +1,51 @@
+---
+description: React/Inertia components — size limits, types outside components, clean UI
+globs: resources/js/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# React & Inertia Frontend
+
+## File size
+
+- Components and hooks **under 150 lines**. Extract subcomponents, hooks, or helpers early.
+- Pages (`Pages/**`) compose feature components; avoid large inline forms/tables.
+
+## Types & interfaces — never in component files
+
+- Put types in `resources/js/types/` (or `types/<module>.ts`), not in `.tsx` component/page files.
+- Components import types: `import type { Asset } from '@/types/asset'`.
+
+```tsx
+// ❌ BAD — types declared in AssetTable.tsx
+interface AssetRow { id: number; name: string }
+export function AssetTable({ rows }: { rows: AssetRow[] }) {}
+
+// ✅ GOOD — types in types/asset.ts
+import type { Asset } from '@/types/asset';
+export function AssetTable({ assets }: { assets: Asset[] }) {}
+```
+
+## Naming
+
+- Components: `PascalCase` files matching export (`AssetTable.tsx`).
+- Hooks: `useAssetSearch`, not `useData` / `useX`.
+- Event handlers: `handleSubmit`, `handleFolderSelect` — not `onClick1` / `fn`.
+
+## Inertia patterns
+
+- Initial page data from controller props only — no `useEffect` fetch on mount for page load.
+- Mutations: `useForm` / `<Form>` for `web.php`; Axios (+ TanStack Query) only for `api.php` interactive calls.
+- After AI save / move, prefer `router.reload({ only: ['assets'] })` over full navigation.
+
+## Structure
+
+```
+Pages/          # screens only
+Components/ui/  # shadcn primitives (do not hand-edit casually)
+Components/<module>/  # feature UI
+hooks/          # api.php wrappers
+types/          # shared TS types
+```
+
+Keep JSX free of business rules that belong on the server (depth limits, ownership).

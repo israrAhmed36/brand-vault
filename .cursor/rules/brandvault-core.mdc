@@ -1,0 +1,31 @@
+---
+description: Core BrandVault coding standards — cleanliness, size limits, naming
+alwaysApply: true
+---
+
+# BrandVault Core Standards
+
+Follow `BrandVault-Project-Plan (1).md` for architecture, routes, and API envelopes.
+
+## Size & cleanliness
+
+- Keep every new/edited file **under 150 lines**. Split when approaching the limit.
+- No dead code, commented-out blocks, or drive-by refactors outside the task.
+- Prefer small, single-purpose functions and classes.
+
+## Naming
+
+- Use meaningful names: `$assetRepository`, `folderDepth`, `primaryColor` — never `x`, `c`, `t`, `data2`, `tmp`.
+- Booleans read as questions/states: `$isFolderEmpty`, `$hasChildren`.
+- Constants: `UPPER_SNAKE_CASE` for true constants; enums for fixed domain sets.
+
+## Architecture (non-negotiable)
+
+- **Modular** layout under `app/Modules/{Module}/` (Controllers, Requests, Services, Repositories, Models, Policies, routes).
+- **Service / Repository** pattern: controllers orchestrate only; services own business rules; repositories own Eloquent queries.
+- Cross-user isolation: every query/policy scopes by `user_id`.
+
+## Commits
+
+- Imperative, focused subject (≈72 chars). Body explains *why* when needed.
+- One logical change per commit; do not mix formatting with features.
