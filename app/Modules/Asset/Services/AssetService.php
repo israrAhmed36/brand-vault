@@ -3,6 +3,10 @@
 namespace App\Modules\Asset\Services;
 
 use App\Models\User;
+use App\Modules\ActivityLog\Enums\ActivityAction;
+use App\Modules\ActivityLog\Enums\ActivityModule;
+use App\Modules\ActivityLog\Services\ActivityLogService;
+use App\Modules\ActivityLog\Support\ActivitySnapshot;
 use App\Modules\Asset\Models\Asset;
 use App\Modules\Asset\Repositories\AssetRepositoryInterface;
 use App\Modules\Folder\Repositories\FolderRepositoryInterface;
@@ -15,6 +19,7 @@ class AssetService
         private readonly AssetRepositoryInterface $assets,
         private readonly FolderRepositoryInterface $folders,
         private readonly AssetFileService $files,
+        private readonly ActivityLogService $activityLogs,
     ) {}
 
     public function findOwned(User $user, int $assetId): ?Asset
@@ -55,8 +60,19 @@ class AssetService
     {
         $this->assertFolderOwned($user, $attributes['folder_id'] ?? null);
         $attributes['url'] = (string) $this->files->toCanonicalUrl($attributes['url']);
+        $asset = $this->assets->createForUser($user->id, $attributes);
 
-        return $this->assets->createForUser($user->id, $attributes);
+        $this->activityLogs->record(
+            $user,
+            ActivityModule::Asset,
+            ActivityAction::Created,
+            $asset,
+            null,
+            ActivitySnapshot::asset($asset),
+            $asset->name,
+        );
+
+        return $asset;
     }
 
     /**
@@ -69,54 +85,45 @@ class AssetService
         ?UploadedFile $file = null,
     ): Asset {
         $this->assertFolderOwned($user, $attributes['folder_id'] ?? null);
+        $oldValues = ActivitySnapshot::asset($asset);
 
         if ($file !== null) {
             $attributes['url'] = $this->files->store($user, $file);
         }
 
         $attributes['url'] = (string) $this->files->toCanonicalUrl($attributes['url']);
+        $updated = $this->assets->updateForUser($user->id, $asset, $attributes);
 
-        return $this->assets->updateForUser($user->id, $asset, $attributes);
+        $this->activityLogs->record(
+            $user,
+            ActivityModule::Asset,
+            ActivityAction::Updated,
+            $updated,
+            $oldValues,
+            ActivitySnapshot::asset($updated),
+            $updated->name,
+        );
+
+        return $updated;
     }
 
     public function move(User $user, Asset $asset, ?int $folderId): Asset
     {
         $this->assertFolderOwned($user, $folderId);
+        $oldValues = ActivitySnapshot::asset($asset);
+        $moved = $this->assets->moveForUser($user->id, $asset, $folderId);
 
-        return $this->assets->moveForUser($user->id, $asset, $folderId);
-    }
+        $this->activityLogs->record(
+            $user,
+            ActivityModule::Asset,
+            ActivityAction::Moved,
+            $moved,
+            $oldValues,
+            ActivitySnapshot::asset($moved),
+            $moved->name,
+        );
 
-    public function softDelete(User $user, Asset $asset): void
-    {
-        $this->assets->softDeleteForUser($user->id, $asset);
-    }
-
-    /**
-     * @return array{asset: Asset, restored_to_root: bool}
-     */
-    public function restore(User $user, Asset $asset): array
-    {
-        $restored = $this->assets->restoreForUser($user->id, $asset);
-        $restoredToRoot = false;
-
-        if ($restored->folder_id !== null) {
-            $folder = $this->folders->findForUser($user->id, $restored->folder_id);
-
-            if ($folder === null) {
-                $restored->forceFill(['folder_id' => null])->save();
-                $restoredToRoot = true;
-            }
-        }
-
-        return [
-            'asset' => $restored->refresh(),
-            'restored_to_root' => $restoredToRoot,
-        ];
-    }
-
-    public function forceDelete(User $user, Asset $asset): void
-    {
-        $this->assets->forceDeleteForUser($user->id, $asset);
+        return $moved;
     }
 
     private function assertFolderOwned(User $user, ?int $folderId): void

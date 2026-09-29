@@ -3,7 +3,6 @@
 namespace Tests\Unit\Modules\Folder;
 
 use App\Models\User;
-use App\Modules\Folder\Repositories\FolderRepository;
 use App\Modules\Folder\Services\FolderService;
 use App\Shared\Exceptions\FolderDepthExceededException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,7 +15,7 @@ class FolderServiceTest extends TestCase
     public function test_create_sets_depth_from_parent(): void
     {
         $user = User::factory()->create();
-        $service = new FolderService(new FolderRepository);
+        $service = $this->app->make(FolderService::class);
 
         $root = $service->create($user, ['name' => 'Root']);
         $child = $service->create($user, [
@@ -31,7 +30,7 @@ class FolderServiceTest extends TestCase
     public function test_create_rejects_depth_above_two(): void
     {
         $user = User::factory()->create();
-        $service = new FolderService(new FolderRepository);
+        $service = $this->app->make(FolderService::class);
 
         $root = $service->create($user, ['name' => 'Root']);
         $mid = $service->create($user, [

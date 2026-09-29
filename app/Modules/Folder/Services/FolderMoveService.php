@@ -3,6 +3,10 @@
 namespace App\Modules\Folder\Services;
 
 use App\Models\User;
+use App\Modules\ActivityLog\Enums\ActivityAction;
+use App\Modules\ActivityLog\Enums\ActivityModule;
+use App\Modules\ActivityLog\Services\ActivityLogService;
+use App\Modules\ActivityLog\Support\ActivitySnapshot;
 use App\Modules\Folder\Models\Folder;
 use App\Modules\Folder\Repositories\FolderRepositoryInterface;
 use App\Modules\Folder\Support\FolderDepth;
@@ -14,6 +18,7 @@ class FolderMoveService
 {
     public function __construct(
         private readonly FolderRepositoryInterface $folders,
+        private readonly ActivityLogService $activityLogs,
     ) {}
 
     /**
@@ -25,6 +30,8 @@ class FolderMoveService
         if ($folder->parent_id === $newParentId) {
             return $folder;
         }
+
+        $oldValues = ActivitySnapshot::folder($folder);
 
         /** @var Collection<int, Folder> $all */
         $all = $this->folders->allForUser($user->id)->keyBy('id');
@@ -63,7 +70,7 @@ class FolderMoveService
             throw new FolderDepthExceededException;
         }
 
-        return $this->folders->reparentSubtreeForUser(
+        $moved = $this->folders->reparentSubtreeForUser(
             $user->id,
             $folder,
             $newParentId,
@@ -71,6 +78,18 @@ class FolderMoveService
             $descendants,
             $depthDelta,
         );
+
+        $this->activityLogs->record(
+            $user,
+            ActivityModule::Folder,
+            ActivityAction::Moved,
+            $moved,
+            $oldValues,
+            ActivitySnapshot::folder($moved),
+            $moved->name,
+        );
+
+        return $moved;
     }
 
     /**

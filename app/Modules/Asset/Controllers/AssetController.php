@@ -7,6 +7,7 @@ use App\Modules\Asset\Models\Asset;
 use App\Modules\Asset\Requests\CreateAssetRequest;
 use App\Modules\Asset\Requests\UpdateAssetRequest;
 use App\Modules\Asset\Services\AssetService;
+use App\Modules\Asset\Services\AssetTrashService;
 use App\Modules\Asset\Services\CreateAssetsFromFiles;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -16,6 +17,7 @@ class AssetController
 {
     public function __construct(
         private readonly AssetService $assetService,
+        private readonly AssetTrashService $assetTrashService,
         private readonly CreateAssetsFromFiles $createAssetsFromFiles,
     ) {}
 
@@ -69,7 +71,7 @@ class AssetController
         $user = request()->user();
         abort_unless($user->can('delete', $asset), 403);
 
-        $this->assetService->softDelete($user, $asset);
+        $this->assetTrashService->softDelete($user, $asset);
 
         Inertia::flash('toast', [
             'type' => 'success',
@@ -86,7 +88,7 @@ class AssetController
         abort_if($model === null || $model->deleted_at === null, 404);
         abort_unless($user->can('restore', $model), 403);
 
-        $result = $this->assetService->restore($user, $model);
+        $result = $this->assetTrashService->restore($user, $model);
 
         Inertia::flash('toast', [
             'type' => 'success',
@@ -105,7 +107,7 @@ class AssetController
         abort_if($model === null || $model->deleted_at === null, 404);
         abort_unless($user->can('forceDelete', $model), 403);
 
-        $this->assetService->forceDelete($user, $model);
+        $this->assetTrashService->forceDelete($user, $model);
 
         Inertia::flash('toast', [
             'type' => 'success',

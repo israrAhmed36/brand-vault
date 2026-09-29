@@ -3,9 +3,14 @@
 namespace App\Modules\Folder\Services;
 
 use App\Models\User;
+use App\Modules\ActivityLog\Enums\ActivityAction;
+use App\Modules\ActivityLog\Enums\ActivityModule;
+use App\Modules\ActivityLog\Services\ActivityLogService;
+use App\Modules\ActivityLog\Support\ActivitySnapshot;
 use App\Modules\Folder\Models\Folder;
 use App\Modules\Folder\Repositories\FolderRepositoryInterface;
 use App\Modules\Folder\Support\FolderDepth;
+use App\Modules\Folder\Support\FolderPresentation;
 use App\Shared\Exceptions\FolderDepthExceededException;
 use App\Shared\Exceptions\FolderNotEmptyException;
 use Illuminate\Support\Collection;
@@ -14,6 +19,7 @@ class FolderService
 {
     public function __construct(
         private readonly FolderRepositoryInterface $folders,
+        private readonly ActivityLogService $activityLogs,
     ) {}
 
     public function findOwned(User $user, int $folderId): ?Folder
@@ -42,29 +48,7 @@ class FolderService
      */
     public function optionsForUser(User $user): array
     {
-        $folders = $this->folders->allForUser($user->id);
-        $byId = $folders->keyBy('id');
-        $options = [
-            ['id' => null, 'label' => 'Library (root)'],
-        ];
-
-        foreach ($folders as $folder) {
-            $parts = [];
-            $current = $folder;
-
-            while ($current !== null) {
-                array_unshift($parts, $current->name);
-                $parentId = $current->parent_id;
-                $current = $parentId !== null ? $byId->get($parentId) : null;
-            }
-
-            $options[] = [
-                'id' => $folder->id,
-                'label' => implode(' / ', $parts),
-            ];
-        }
-
-        return $options;
+        return FolderPresentation::options($this->folders->allForUser($user->id));
     }
 
     /**
@@ -72,22 +56,7 @@ class FolderService
      */
     public function breadcrumbs(?Folder $folder): array
     {
-        if ($folder === null) {
-            return [];
-        }
-
-        $crumbs = [];
-        $current = $folder;
-
-        while ($current !== null) {
-            array_unshift($crumbs, [
-                'id' => $current->id,
-                'name' => $current->name,
-            ]);
-            $current = $current->parent;
-        }
-
-        return $crumbs;
+        return FolderPresentation::breadcrumbs($folder);
     }
 
     /**
@@ -110,11 +79,23 @@ class FolderService
             throw new FolderDepthExceededException;
         }
 
-        return $this->folders->createForUser($user->id, [
+        $folder = $this->folders->createForUser($user->id, [
             'name' => $attributes['name'],
             'parent_id' => $parentId,
             'depth' => $depth,
         ]);
+
+        $this->activityLogs->record(
+            $user,
+            ActivityModule::Folder,
+            ActivityAction::Created,
+            $folder,
+            null,
+            ActivitySnapshot::folder($folder),
+            $folder->name,
+        );
+
+        return $folder;
     }
 
     /**
@@ -122,7 +103,20 @@ class FolderService
      */
     public function update(User $user, Folder $folder, array $attributes): Folder
     {
-        return $this->folders->updateForUser($user->id, $folder, $attributes);
+        $oldValues = ActivitySnapshot::folder($folder);
+        $updated = $this->folders->updateForUser($user->id, $folder, $attributes);
+
+        $this->activityLogs->record(
+            $user,
+            ActivityModule::Folder,
+            ActivityAction::Updated,
+            $updated,
+            $oldValues,
+            ActivitySnapshot::folder($updated),
+            $updated->name,
+        );
+
+        return $updated;
     }
 
     /**
@@ -134,6 +128,18 @@ class FolderService
             throw new FolderNotEmptyException;
         }
 
+        $oldValues = ActivitySnapshot::folder($folder);
+        $label = $folder->name;
         $this->folders->deleteForUser($user->id, $folder);
+
+        $this->activityLogs->record(
+            $user,
+            ActivityModule::Folder,
+            ActivityAction::Deleted,
+            null,
+            $oldValues,
+            null,
+            $label,
+        );
     }
 }
