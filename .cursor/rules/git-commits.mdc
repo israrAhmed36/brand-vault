@@ -1,0 +1,26 @@
+---
+description: Git commit message conventions for BrandVault
+alwaysApply: true
+---
+
+# Commit Conventions
+
+- Use imperative mood: “Add asset soft-delete service”, not “Added” / “Adds”.
+- Subject ≈ 72 characters; optional body for *why* and notable tradeoffs.
+- One concern per commit (feature, fix, refactor, test, chore).
+- Reference module when useful: `Asset: block folder delete when non-empty`.
+- Do not commit `.env`, secrets, `node_modules`, `vendor`, or generated Wayfinder `actions`/`routes`.
+- Do not use `--no-verify` to skip Husky unless explicitly requested.
+
+Examples:
+
+```
+Add FolderService depth validation on create
+
+Enforce max depth of 2 in the service layer so Form Requests stay
+focused on input shape.
+```
+
+```
+Fix API error envelope for FolderNotEmptyException
+```

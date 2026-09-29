@@ -1,0 +1,47 @@
+---
+description: Laravel modular architecture — thin controllers, services, repositories
+globs: app/Modules/**/*.php,app/Shared/**/*.php,app/Providers/**/*.php
+alwaysApply: false
+---
+
+# Modular Service / Repository Pattern
+
+## Layer duties
+
+| Layer | Responsibility | Must not |
+|---|---|---|
+| Controller | Authorize → call service → return Inertia/JSON | Business rules, Eloquent queries, validation rules |
+| Form Request | Input validation & authorization hooks | Persist data, call AI/providers |
+| Service | Business logic, domain exceptions, orchestration | Raw HTTP/Inertia response shaping beyond DTOs |
+| Repository | Eloquent queries, always `user_id`-scoped | Business policy (depth limits, “folder not empty”) |
+| Policy | Ownership / ability checks | Queries beyond simple ownership |
+
+## Thin controller example
+
+```php
+// ✅ GOOD
+public function store(CreateAssetRequest $request): RedirectResponse
+{
+    $asset = $this->assetService->create($request->user(), $request->validated());
+
+    return redirect()->back();
+}
+
+// ❌ BAD — logic + Eloquent in controller
+public function store(Request $request)
+{
+    $asset = Asset::create([...$request->all(), 'user_id' => auth()->id()]);
+    if ($asset->folder && $asset->folder->depth > 2) { /* ... */ }
+}
+```
+
+## Module layout
+
+```
+app/Modules/{Name}/
+  Controllers/  Requests/  Services/  Repositories/
+  Models/  Policies/  routes.php
+```
+
+Bind `*RepositoryInterface` → `*Repository` in `ModuleServiceProvider`.
+Inject interfaces into services, not concrete repositories.

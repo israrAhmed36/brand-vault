@@ -1,0 +1,14 @@
+---
+description: Testing expectations for modular Laravel + Inertia features
+globs: tests/**/*.php,app/Modules/**/*.php
+alwaysApply: false
+---
+
+# Testing Standards
+
+- Prefer Feature tests for HTTP/Inertia/API behavior; Unit tests for pure domain helpers/validators.
+- Assert Inertia with `assertInertia(fn (...) => ...)` for page controllers.
+- Assert JSON envelope keys: `success`, `data` / `error.code` for `api.php`.
+- Always include a **cross-user isolation** case when adding Brand/Folder/Asset endpoints.
+- Name tests descriptively: `test_user_cannot_view_another_users_asset`.
+- Soft-delete tests: ensure default index excludes trash; trash route uses `onlyTrashed`.
