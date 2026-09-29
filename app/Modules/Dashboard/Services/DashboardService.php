@@ -52,10 +52,9 @@ class DashboardService
                 $this->brandService->forUser($user),
             ),
             'recentAssets' => $this->presentRecentAssets($user),
-            'recentActivity' => $this->activityLogs
-                ->recentForUser($user->id)
-                ->values()
-                ->all(),
+            'recentActivity' => array_values(
+                $this->activityLogs->recentForUser($user->id)->all(),
+            ),
         ];
     }
 
@@ -91,6 +90,6 @@ class DashboardService
             );
         }
 
-        return $assets->values()->all();
+        return array_values($assets->all());
     }
 }

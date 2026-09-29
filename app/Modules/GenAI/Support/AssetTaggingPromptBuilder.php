@@ -26,9 +26,7 @@ final class AssetTaggingPromptBuilder
 
         return [
             'asset_name' => $asset->name,
-            'asset_type' => $asset->type instanceof \BackedEnum
-                ? $asset->type->value
-                : (string) $asset->type,
+            'asset_type' => $asset->type->value,
             'asset_url' => $asset->url,
             'folder_name' => $folderName !== null && $folderName !== '' ? $folderName : 'n/a',
             'brand_name' => $brand?->name ?: 'n/a',
