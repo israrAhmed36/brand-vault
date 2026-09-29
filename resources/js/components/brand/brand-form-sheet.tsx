@@ -1,5 +1,6 @@
 import { useForm } from '@inertiajs/react';
-import { useEffect, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { toast } from 'sonner';
 import { BrandFormFields } from '@/components/brand/brand-form-fields';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,34 +12,14 @@ import {
     SheetTitle,
 } from '@/components/ui/sheet';
 import { Spinner } from '@/components/ui/spinner';
+import { usePendingBrandLogo } from '@/hooks/use-pending-brand-logo';
+import { uploadBrandLogo } from '@/lib/brand-logo-upload';
+import {
+    toBrandFormValues,
+    toBrandSubmitPayload,
+} from '@/lib/brand-form-values';
 import { toastFormErrors } from '@/lib/toast-form-errors';
-import type {
-    Brand,
-    BrandFormSheetProps,
-    BrandFormValues,
-} from '@/types/brand';
-
-const EMPTY_BRAND_FORM: BrandFormValues = {
-    name: '',
-    primary_color: '#111827',
-    secondary_color: '#0F766E',
-    logo_url: '',
-    default_font: '',
-};
-
-function toFormValues(brand: Brand | null): BrandFormValues {
-    if (brand === null) {
-        return { ...EMPTY_BRAND_FORM };
-    }
-
-    return {
-        name: brand.name,
-        primary_color: brand.primary_color,
-        secondary_color: brand.secondary_color,
-        logo_url: brand.logo_url ?? '',
-        default_font: brand.default_font ?? '',
-    };
-}
+import type { BrandFormSheetProps, BrandFormValues } from '@/types/brand';
 
 export function BrandFormSheet({
     brand,
@@ -46,31 +27,58 @@ export function BrandFormSheet({
     onOpenChange,
 }: BrandFormSheetProps) {
     const isEditing = brand !== null;
-    const form = useForm<BrandFormValues>(toFormValues(brand));
+    const form = useForm<BrandFormValues>(toBrandFormValues(brand));
     const brandKey = brand?.id ?? 'new';
+    const pendingLogo = usePendingBrandLogo(open);
+    const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+    const isBusy = form.processing || isUploadingLogo;
 
     useEffect(() => {
         if (!open) {
             return;
         }
 
-        form.setData(toFormValues(brand));
+        form.setData(toBrandFormValues(brand));
         form.clearErrors();
     }, [open, brandKey]);
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    function handleLogoClear() {
+        pendingLogo.clear();
+        form.setData('logo_url', '');
+    }
+
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        form.transform((data) => ({
-            ...data,
-            logo_url: data.logo_url.trim() === '' ? null : data.logo_url,
-            default_font:
-                data.default_font.trim() === '' ? null : data.default_font,
-        }));
+        let logoUrl =
+            form.data.logo_url.trim() === '' ? null : form.data.logo_url;
 
+        if (pendingLogo.pending !== null) {
+            setIsUploadingLogo(true);
+
+            try {
+                logoUrl = await uploadBrandLogo(pendingLogo.pending.file);
+            } catch (caught) {
+                toast.error(
+                    caught instanceof Error
+                        ? caught.message
+                        : 'Logo upload failed.',
+                );
+                setIsUploadingLogo(false);
+
+                return;
+            }
+
+            setIsUploadingLogo(false);
+        }
+
+        form.transform((data) => toBrandSubmitPayload(data, logoUrl));
         form.put('/brand', {
             preserveScroll: true,
-            onSuccess: () => onOpenChange(false),
+            onSuccess: () => {
+                pendingLogo.clear();
+                onOpenChange(false);
+            },
             onError: (errors) => toastFormErrors(errors),
         });
     }
@@ -86,7 +94,8 @@ export function BrandFormSheet({
                         {isEditing ? 'Edit brand kit' : 'Create brand kit'}
                     </SheetTitle>
                     <SheetDescription>
-                        Colors, logo, and type used across your asset library.
+                        Colors, logo, and type for your library. Logo uploads
+                        when you save.
                     </SheetDescription>
                 </SheetHeader>
 
@@ -97,7 +106,14 @@ export function BrandFormSheet({
                     <BrandFormFields
                         values={form.data}
                         errors={form.errors}
+                        logoPreviewUrl={
+                            pendingLogo.pending?.previewUrl ??
+                            form.data.logo_url
+                        }
+                        hasPendingLogo={pendingLogo.pending !== null}
                         onChange={(field, value) => form.setData(field, value)}
+                        onLogoFileSelected={pendingLogo.selectFile}
+                        onLogoClear={handleLogoClear}
                     />
 
                     <SheetFooter className="mt-auto flex-row gap-2 border-t border-border px-0 pt-4 pb-0 sm:justify-end">
@@ -108,8 +124,8 @@ export function BrandFormSheet({
                         >
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={form.processing}>
-                            {form.processing ? <Spinner /> : null}
+                        <Button type="submit" disabled={isBusy}>
+                            {isBusy ? <Spinner /> : null}
                             {isEditing ? 'Save changes' : 'Create kit'}
                         </Button>
                     </SheetFooter>

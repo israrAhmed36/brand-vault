@@ -44,10 +44,20 @@ export type BrandLogoMarkProps = {
     size?: 'sm' | 'md';
 };
 
+export type PendingBrandLogo = {
+    key: string;
+    file: File;
+    previewUrl: string;
+};
+
 export type BrandFormFieldsProps = {
     values: BrandFormValues;
     errors: Partial<Record<keyof BrandFormValues, string>>;
+    logoPreviewUrl: string;
+    hasPendingLogo: boolean;
     onChange: (field: keyof BrandFormValues, value: string) => void;
+    onLogoFileSelected: (file: File) => void;
+    onLogoClear: () => void;
 };
 
 export type BrandFormSheetProps = {
@@ -72,10 +82,12 @@ export type BrandDeleteDialogProps = {
 };
 
 export type LogoDropzoneProps = {
-    value: string;
+    previewUrl: string;
+    hasPendingFile?: boolean;
     error?: string;
     disabled?: boolean;
-    onChange: (logoUrl: string) => void;
+    onFileSelected: (file: File) => void;
+    onClear: () => void;
 };
 
 export type BrandEmptyStateProps = {

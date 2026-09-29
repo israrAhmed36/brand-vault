@@ -8,7 +8,11 @@ import type { BrandFormFieldsProps } from '@/types/brand';
 export function BrandFormFields({
     values,
     errors,
+    logoPreviewUrl,
+    hasPendingLogo,
     onChange,
+    onLogoFileSelected,
+    onLogoClear,
 }: BrandFormFieldsProps) {
     return (
         <div className="grid gap-5">
@@ -43,9 +47,11 @@ export function BrandFormFields({
             </div>
 
             <LogoDropzone
-                value={values.logo_url}
+                previewUrl={logoPreviewUrl}
+                hasPendingFile={hasPendingLogo}
                 error={errors.logo_url}
-                onChange={(logoUrl) => onChange('logo_url', logoUrl)}
+                onFileSelected={onLogoFileSelected}
+                onClear={onLogoClear}
             />
 
             <div className="grid gap-2">
