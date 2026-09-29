@@ -43,8 +43,7 @@ class CreateAssetsFromFiles
             return mb_substr(trim($preferred), 0, 255);
         }
 
-        $base = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        $base = trim(is_string($base) ? $base : '');
+        $base = trim(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
 
         return $base === '' ? 'Untitled asset' : mb_substr($base, 0, 255);
     }

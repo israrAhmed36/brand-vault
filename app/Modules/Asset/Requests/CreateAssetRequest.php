@@ -82,19 +82,16 @@ class CreateAssetRequest extends FormRequest
      */
     private function uploadedFiles(): array
     {
-        $files = $this->file('files', []);
+        if (! $this->hasFile('files')) {
+            return [];
+        }
+
+        $files = $this->file('files');
 
         if ($files instanceof UploadedFile) {
             return [$files];
         }
 
-        if (! is_array($files)) {
-            return [];
-        }
-
-        return array_values(array_filter(
-            $files,
-            fn (mixed $file): bool => $file instanceof UploadedFile,
-        ));
+        return array_values($files);
     }
 }
