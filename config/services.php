@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'supabase' => [
+        'url' => env('SUPABASE_URL'),
+        'key' => env('SUPABASE_SERVICE_ROLE_KEY'),
+        'brand_logos_bucket' => env('SUPABASE_BRAND_LOGOS_BUCKET', 'brand-logos'),
+    ],
+
 ];
