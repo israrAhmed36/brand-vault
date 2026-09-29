@@ -26,10 +26,10 @@ pnpm dev
 
 ## Git hooks
 
-| Hook | What it enforces |
-|------|------------------|
+| Hook           | What it enforces                                                           |
+| -------------- | -------------------------------------------------------------------------- |
 | **pre-commit** | Pint (PHP), Vite+ format/lint on staged `resources/js`, TypeScript (`tsc`) |
-| **pre-push** | Frontend build, lint, TypeScript + PHPStan, Laravel tests |
+| **pre-push**   | Frontend build, lint, TypeScript + PHPStan, Laravel tests                  |
 
 After `pnpm install`, run `pnpm exec husky` once so hooks are registered.
 
