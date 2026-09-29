@@ -14,7 +14,7 @@ export function AssetPreview({ asset }: Pick<AssetCardProps, 'asset'>) {
     return (
         <div
             className={cn(
-                'relative aspect-[16/10] overflow-hidden',
+                'relative aspect-[4/3] overflow-hidden',
                 showImage ? 'bg-muted/60' : visual.tileClassName,
             )}
         >

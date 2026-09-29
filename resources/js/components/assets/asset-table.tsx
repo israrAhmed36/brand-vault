@@ -1,11 +1,13 @@
 import { ImagePlus } from 'lucide-react';
-import { AssetCard } from '@/components/assets/asset-card';
+import { AssetTypeSection } from '@/components/assets/asset-type-section';
+import { TrashBulkToolbar } from '@/components/assets/trash-bulk-toolbar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { assetCountLabel } from '@/lib/asset-display';
+import {
+    assetCountLabel,
+    assetGridClassName,
+    groupAssetsByType,
+} from '@/lib/asset-display';
 import type { AssetTableProps } from '@/types/asset';
-
-const assetGridClassName =
-    'grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5';
 
 export function AssetTable({
     assets,
@@ -17,8 +19,12 @@ export function AssetTable({
     onMove,
     onRestore,
     onForceDelete,
+    trashSelection,
+    onBulkRestoreSelected,
+    onBulkForceDeleteSelected,
 }: AssetTableProps) {
     const activeSearch = searchQuery?.trim() ?? '';
+    const assetGroups = groupAssetsByType(assets);
 
     return (
         <section className="flex h-full min-h-80 flex-col overflow-hidden rounded-lg border border-border bg-muted/25">
@@ -33,6 +39,27 @@ export function AssetTable({
                 )}
             </div>
 
+            {trashSelection &&
+            onBulkRestoreSelected &&
+            onBulkForceDeleteSelected &&
+            !isLoading &&
+            assets.length > 0 ? (
+                <TrashBulkToolbar
+                    selectedCount={trashSelection.selectedCount}
+                    isAllSelected={trashSelection.isAllSelected}
+                    isIndeterminate={trashSelection.isIndeterminate}
+                    onSelectAllChange={(selectAll) => {
+                        if (selectAll) {
+                            trashSelection.selectAll();
+                        } else {
+                            trashSelection.clearSelection();
+                        }
+                    }}
+                    onRestore={onBulkRestoreSelected}
+                    onForceDelete={onBulkForceDeleteSelected}
+                />
+            ) : null}
+
             <div className="flex-1 p-4 md:p-5">
                 {isLoading ? <AssetCardSkeletons /> : null}
 
@@ -44,21 +71,22 @@ export function AssetTable({
                 ) : null}
 
                 {!isLoading && assets.length > 0 ? (
-                    <ul className={assetGridClassName}>
-                        {assets.map((asset) => (
-                            <li key={asset.id}>
-                                <AssetCard
-                                    asset={asset}
-                                    showRestore={showRestore}
-                                    onEdit={onEdit}
-                                    onDelete={onDelete}
-                                    onMove={onMove}
-                                    onRestore={onRestore}
-                                    onForceDelete={onForceDelete}
-                                />
-                            </li>
+                    <div className="space-y-8">
+                        {assetGroups.map((group) => (
+                            <AssetTypeSection
+                                key={group.type}
+                                type={group.type}
+                                assets={group.assets}
+                                showRestore={showRestore}
+                                onEdit={onEdit}
+                                onDelete={onDelete}
+                                onMove={onMove}
+                                onRestore={onRestore}
+                                onForceDelete={onForceDelete}
+                                trashSelection={trashSelection}
+                            />
                         ))}
-                    </ul>
+                    </div>
                 ) : null}
             </div>
         </section>
@@ -73,10 +101,10 @@ function AssetCardSkeletons() {
                     key={key}
                     className="overflow-hidden rounded-md border border-border bg-card"
                 >
-                    <Skeleton className="aspect-[16/10] w-full rounded-none" />
-                    <div className="space-y-1.5 px-2.5 py-2">
-                        <Skeleton className="h-3 w-2/3" />
-                        <Skeleton className="h-2.5 w-1/3" />
+                    <Skeleton className="aspect-[4/3] w-full rounded-none" />
+                    <div className="space-y-1.5 px-3 py-3">
+                        <Skeleton className="h-4 w-2/3" />
+                        <Skeleton className="h-3 w-1/3" />
                     </div>
                 </div>
             ))}
