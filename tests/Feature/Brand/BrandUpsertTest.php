@@ -111,4 +111,31 @@ class BrandUpsertTest extends TestCase
             ->delete(route('brand.destroy'))
             ->assertNotFound();
     }
+
+    public function test_user_can_create_brand_without_optional_fields(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->put(route('brand.update'), [
+            'name' => 'Minimal Co',
+            'primary_color' => '#111827',
+            'secondary_color' => '#0F766E',
+        ])->assertRedirect(route('brand.edit'));
+
+        $this->assertDatabaseHas('brands', [
+            'user_id' => $user->id,
+            'name' => 'Minimal Co',
+            'logo_url' => null,
+            'default_font' => null,
+        ]);
+    }
+
+    public function test_guest_cannot_upsert_or_delete_brand(): void
+    {
+        $this->put(route('brand.update'), $this->validPayload())
+            ->assertRedirect('/');
+
+        $this->delete(route('brand.destroy'))
+            ->assertRedirect('/');
+    }
 }

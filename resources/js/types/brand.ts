@@ -36,6 +36,14 @@ export type ColorSwatchProps = {
     className?: string;
 };
 
+export type BrandLogoMarkProps = {
+    name: string;
+    logoUrl: string | null;
+    primaryColor: string;
+    secondaryColor: string;
+    size?: 'sm' | 'md';
+};
+
 export type BrandFormFieldsProps = {
     values: BrandFormValues;
     errors: Partial<Record<keyof BrandFormValues, string>>;
@@ -51,8 +59,23 @@ export type BrandFormSheetProps = {
 export type BrandKitPreviewProps = {
     brand: Brand;
     onEdit: () => void;
-    onDelete: () => void;
+    onDeleteRequest: () => void;
     isDeleting: boolean;
+};
+
+export type BrandDeleteDialogProps = {
+    brandName: string;
+    open: boolean;
+    isDeleting: boolean;
+    onOpenChange: (open: boolean) => void;
+    onConfirm: () => void;
+};
+
+export type LogoDropzoneProps = {
+    value: string;
+    error?: string;
+    disabled?: boolean;
+    onChange: (logoUrl: string) => void;
 };
 
 export type BrandEmptyStateProps = {

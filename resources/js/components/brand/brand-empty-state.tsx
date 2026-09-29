@@ -1,23 +1,27 @@
+import { Plus, SwatchBook } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { BrandEmptyStateProps } from '@/types/brand';
 
 export function BrandEmptyState({ onCreate }: BrandEmptyStateProps) {
     return (
-        <section className="flex flex-col items-start gap-6 rounded-2xl border border-dashed border-border bg-[linear-gradient(180deg,oklch(0.98_0.01_95),oklch(0.96_0.01_95))] px-8 py-12 dark:bg-[linear-gradient(180deg,oklch(0.22_0.01_95),oklch(0.18_0.01_95))]">
-            <div className="space-y-2">
-                <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
-                    Brand kit
-                </p>
-                <h2 className="max-w-md text-3xl font-semibold tracking-tight text-foreground">
-                    Set the look your assets follow
-                </h2>
-                <p className="max-w-lg text-sm leading-relaxed text-muted-foreground">
-                    One kit per workspace — primary and secondary colors, logo,
-                    and default font. Edit anytime from the sheet on the right.
-                </p>
+        <section className="flex flex-col items-start gap-4 rounded-xl border border-dashed border-border bg-muted/20 px-5 py-8 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground">
+                    <SwatchBook className="size-4" />
+                </div>
+                <div className="space-y-1">
+                    <h2 className="text-base font-semibold tracking-tight text-foreground">
+                        No brand kit yet
+                    </h2>
+                    <p className="max-w-md text-sm text-muted-foreground">
+                        Add colors, logo, and type once — used across assets and
+                        tagging.
+                    </p>
+                </div>
             </div>
-            <Button type="button" onClick={onCreate}>
-                Create brand kit
+            <Button type="button" size="sm" onClick={onCreate}>
+                <Plus className="size-3.5" />
+                Create kit
             </Button>
         </section>
     );

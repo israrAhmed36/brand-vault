@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, Palette } from 'lucide-react';
+import { LayoutGrid, SwatchBook } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -24,7 +24,7 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Brand kit',
         href: '/brand',
-        icon: Palette,
+        icon: SwatchBook,
     },
 ];
 

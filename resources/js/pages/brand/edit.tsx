@@ -1,29 +1,29 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { BrandDeleteDialog } from '@/components/brand/brand-delete-dialog';
 import { BrandEmptyState } from '@/components/brand/brand-empty-state';
 import { BrandFormSheet } from '@/components/brand/brand-form-sheet';
 import { BrandKitPreview } from '@/components/brand/brand-kit-preview';
 import type { BrandEditPageProps } from '@/types/brand';
 
 export default function BrandEdit() {
-    const { brand, flash } = usePage<
-        BrandEditPageProps & { flash?: { success?: string } }
-    >().props;
+    const { brand } = usePage<BrandEditPageProps>().props;
     const [sheetOpen, setSheetOpen] = useState(false);
+    const [deleteOpen, setDeleteOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    function handleDelete() {
-        if (
-            !window.confirm(
-                'Remove this brand kit? You can create a new one later.',
-            )
-        ) {
-            return;
-        }
-
+    function handleDeleteConfirm() {
         setIsDeleting(true);
         router.delete('/brand', {
             preserveScroll: true,
+            onSuccess: () => {
+                setDeleteOpen(false);
+                setSheetOpen(false);
+            },
+            onError: () => {
+                toast.error('Could not remove brand kit.');
+            },
             onFinish: () => setIsDeleting(false),
         });
     }
@@ -31,27 +31,18 @@ export default function BrandEdit() {
     return (
         <>
             <Head title="Brand kit" />
-            <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 md:p-6">
-                <header className="flex flex-col gap-1">
-                    <h1 className="text-2xl font-semibold tracking-tight">
+            <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 p-4 md:p-6">
+                <header className="flex items-end justify-between gap-4">
+                    <h1 className="text-xl font-semibold tracking-tight">
                         Brand kit
                     </h1>
-                    <p className="text-sm text-muted-foreground">
-                        Your workspace identity for tags, previews, and exports.
-                    </p>
                 </header>
-
-                {flash?.success ? (
-                    <p className="rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-900 dark:border-teal-900 dark:bg-teal-950/40 dark:text-teal-100">
-                        {flash.success}
-                    </p>
-                ) : null}
 
                 {brand ? (
                     <BrandKitPreview
                         brand={brand}
                         onEdit={() => setSheetOpen(true)}
-                        onDelete={handleDelete}
+                        onDeleteRequest={() => setDeleteOpen(true)}
                         isDeleting={isDeleting}
                     />
                 ) : (
@@ -60,10 +51,21 @@ export default function BrandEdit() {
             </div>
 
             <BrandFormSheet
+                key={brand?.id ?? 'create'}
                 brand={brand}
                 open={sheetOpen}
                 onOpenChange={setSheetOpen}
             />
+
+            {brand ? (
+                <BrandDeleteDialog
+                    brandName={brand.name}
+                    open={deleteOpen}
+                    isDeleting={isDeleting}
+                    onOpenChange={setDeleteOpen}
+                    onConfirm={handleDeleteConfirm}
+                />
+            ) : null}
         </>
     );
 }

@@ -4,6 +4,7 @@ namespace App\Modules\Brand\Controllers;
 
 use App\Modules\Brand\Models\Brand;
 use App\Modules\Brand\Requests\UpsertBrandRequest;
+use App\Modules\Brand\Services\BrandLogoService;
 use App\Modules\Brand\Services\BrandService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ class BrandController
 {
     public function __construct(
         private readonly BrandService $brandService,
+        private readonly BrandLogoService $brandLogoService,
     ) {}
 
     public function edit(Request $request): Response
@@ -26,7 +28,7 @@ class BrandController
         }
 
         return Inertia::render('brand/edit', [
-            'brand' => $brand,
+            'brand' => $this->brandLogoService->present($brand),
         ]);
     }
 
@@ -41,11 +43,19 @@ class BrandController
             abort_unless($user->can('create', Brand::class), 403);
         }
 
-        $this->brandService->upsert($user, $request->brandPayload());
+        $payload = $request->brandPayload();
+        $payload['logo_url'] = $this->brandLogoService->toCanonicalUrl(
+            $payload['logo_url'],
+        );
 
-        return redirect()
-            ->route('brand.edit')
-            ->with('success', 'Brand kit saved.');
+        $this->brandService->upsert($user, $payload);
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Brand kit saved.',
+        ]);
+
+        return to_route('brand.edit');
     }
 
     public function destroy(Request $request): RedirectResponse
@@ -58,8 +68,11 @@ class BrandController
 
         $this->brandService->delete($user);
 
-        return redirect()
-            ->route('brand.edit')
-            ->with('success', 'Brand kit removed.');
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Brand kit removed.',
+        ]);
+
+        return to_route('brand.edit');
     }
 }

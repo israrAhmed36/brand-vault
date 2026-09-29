@@ -1,4 +1,5 @@
 import { ColorField } from '@/components/brand/color-field';
+import { LogoDropzone } from '@/components/brand/logo-dropzone';
 import InputError from '@/components/input-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -41,20 +42,11 @@ export function BrandFormFields({
                 />
             </div>
 
-            <div className="grid gap-2">
-                <Label htmlFor="logo_url">Logo URL</Label>
-                <Input
-                    id="logo_url"
-                    name="logo_url"
-                    type="url"
-                    value={values.logo_url}
-                    placeholder="https://cdn.example.com/logo.svg"
-                    onChange={(event) =>
-                        onChange('logo_url', event.target.value)
-                    }
-                />
-                <InputError message={errors.logo_url} />
-            </div>
+            <LogoDropzone
+                value={values.logo_url}
+                error={errors.logo_url}
+                onChange={(logoUrl) => onChange('logo_url', logoUrl)}
+            />
 
             <div className="grid gap-2">
                 <Label htmlFor="default_font">Default font</Label>
