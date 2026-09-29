@@ -39,6 +39,18 @@ class LoginRequest extends FormRequest
     }
 
     /**
+     * @return array{email: string, password: string, remember: bool}
+     */
+    public function credentials(): array
+    {
+        return [
+            'email' => $this->string('email')->toString(),
+            'password' => $this->string('password')->toString(),
+            'remember' => $this->boolean('remember'),
+        ];
+    }
+
+    /**
      * @throws ValidationException
      */
     public function ensureIsNotRateLimited(): void

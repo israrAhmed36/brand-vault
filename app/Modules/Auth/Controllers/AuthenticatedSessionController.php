@@ -29,9 +29,7 @@ class AuthenticatedSessionController
         $request->ensureIsNotRateLimited();
 
         try {
-            $this->authService->attemptLogin(
-                $request->safe()->only(['email', 'password', 'remember']),
-            );
+            $this->authService->attemptLogin($request->credentials());
         } catch (ValidationException $exception) {
             $request->hitRateLimiter();
 

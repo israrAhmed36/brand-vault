@@ -21,11 +21,7 @@ class RegisteredUserController
 
     public function store(RegisterRequest $request): RedirectResponse
     {
-        $this->authService->register($request->safe()->only([
-            'name',
-            'email',
-            'password',
-        ]));
+        $this->authService->register($request->registrationPayload());
 
         return redirect()->route('dashboard');
     }

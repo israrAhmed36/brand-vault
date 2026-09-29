@@ -27,6 +27,18 @@ class RegisterRequest extends FormRequest
     }
 
     /**
+     * @return array{name: string, email: string, password: string}
+     */
+    public function registrationPayload(): array
+    {
+        return [
+            'name' => $this->string('name')->toString(),
+            'email' => $this->string('email')->toString(),
+            'password' => $this->string('password')->toString(),
+        ];
+    }
+
+    /**
      * @return array<string, string>
      */
     public function messages(): array
