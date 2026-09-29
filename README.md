@@ -4,7 +4,7 @@ Laravel + Inertia (React) application for managing brand assets.
 
 ## Stack
 
-- **Backend:** Laravel 13, PHP 8.3+, PostgreSQL
+- **Backend:** Laravel 13, PHP 8.4+, PostgreSQL
 - **Frontend:** React, Inertia, TypeScript, Vite+, Tailwind CSS
 - **Quality:** Husky hooks, Pint, PHPStan/Larastan, Vite+ lint, PHPUnit
 
