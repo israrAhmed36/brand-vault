@@ -12,6 +12,5 @@ storage/framework/sessions/*
 storage/framework/views/*
 tests
 .phpunit.result.cache
-*.md
+README.md
 BrandVault-Project-Plan*
-prompt*
