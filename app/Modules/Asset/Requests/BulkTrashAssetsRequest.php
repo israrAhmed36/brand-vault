@@ -36,9 +36,9 @@ class BulkTrashAssetsRequest extends FormRequest
      */
     public function assetIds(): array
     {
-        return array_map(
-            fn (mixed $id): int => (int) $id,
+        return array_values(array_map(
+            static fn (mixed $id): int => (int) $id,
             $this->input('asset_ids', []),
-        );
+        ));
     }
 }
