@@ -60,6 +60,7 @@ export type AssetTableProps = {
     onEdit?: (asset: Asset) => void;
     onDelete?: (asset: Asset) => void;
     onMove?: (asset: Asset) => void;
+    onGenerateTags?: (asset: Asset) => void;
     onRestore?: (asset: Asset) => void;
     onForceDelete?: (asset: Asset) => void;
     trashSelection?: TrashAssetSelection;
@@ -73,6 +74,7 @@ export type AssetCardProps = Pick<
     | 'onEdit'
     | 'onDelete'
     | 'onMove'
+    | 'onGenerateTags'
     | 'onRestore'
     | 'onForceDelete'
     | 'trashSelection'
@@ -105,6 +107,7 @@ export type AssetTypeSectionProps = Pick<
     | 'onEdit'
     | 'onDelete'
     | 'onMove'
+    | 'onGenerateTags'
     | 'onRestore'
     | 'onForceDelete'
     | 'trashSelection'

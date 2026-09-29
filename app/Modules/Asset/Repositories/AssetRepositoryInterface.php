@@ -34,4 +34,9 @@ interface AssetRepositoryInterface
     public function restoreForUser(int $userId, Asset $asset): Asset;
 
     public function forceDeleteForUser(int $userId, Asset $asset): void;
+
+    /**
+     * @param  array{tags: list<string>, description: string, usage_suggestion: string}  $suggestion
+     */
+    public function updateAiSuggestionForUser(int $userId, Asset $asset, array $suggestion): Asset;
 }

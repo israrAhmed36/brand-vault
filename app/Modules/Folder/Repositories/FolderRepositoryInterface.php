@@ -19,6 +19,8 @@ interface FolderRepositoryInterface
      */
     public function allForUser(int $userId): Collection;
 
+    public function countForUser(int $userId): int;
+
     /**
      * @param  array{name: string, parent_id?: int|null, depth: int}  $attributes
      */

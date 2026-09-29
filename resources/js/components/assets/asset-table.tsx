@@ -17,6 +17,7 @@ export function AssetTable({
     onEdit,
     onDelete,
     onMove,
+    onGenerateTags,
     onRestore,
     onForceDelete,
     trashSelection,
@@ -81,6 +82,7 @@ export function AssetTable({
                                 onEdit={onEdit}
                                 onDelete={onDelete}
                                 onMove={onMove}
+                                onGenerateTags={onGenerateTags}
                                 onRestore={onRestore}
                                 onForceDelete={onForceDelete}
                                 trashSelection={trashSelection}

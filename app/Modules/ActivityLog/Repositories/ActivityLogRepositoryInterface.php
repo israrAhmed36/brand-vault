@@ -4,6 +4,7 @@ namespace App\Modules\ActivityLog\Repositories;
 
 use App\Modules\ActivityLog\Models\ActivityLog;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 interface ActivityLogRepositoryInterface
 {
@@ -17,4 +18,9 @@ interface ActivityLogRepositoryInterface
      * @return LengthAwarePaginator<int, ActivityLog>
      */
     public function listForUser(int $userId, array $filters): LengthAwarePaginator;
+
+    /**
+     * @return Collection<int, ActivityLog>
+     */
+    public function recentForUser(int $userId, int $limit = 8): Collection;
 }

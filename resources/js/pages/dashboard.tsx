@@ -1,25 +1,49 @@
-import { Head } from '@inertiajs/react';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { Head, usePage } from '@inertiajs/react';
+import { DashboardBrandWidget } from '@/components/dashboard/dashboard-brand-widget';
+import { DashboardQuickActions } from '@/components/dashboard/dashboard-quick-actions';
+import { DashboardRecentActivity } from '@/components/dashboard/dashboard-recent-activity';
+import { DashboardRecentAssets } from '@/components/dashboard/dashboard-recent-assets';
+import { DashboardStatCards } from '@/components/dashboard/dashboard-stat-cards';
+import { DashboardTypeBreakdown } from '@/components/dashboard/dashboard-type-breakdown';
 import { dashboard } from '@/routes';
+import type { DashboardPageProps } from '@/types/dashboard';
 
 export default function Dashboard() {
+    const { auth, stats, assetTypes, brand, recentAssets, recentActivity } =
+        usePage<DashboardPageProps>().props;
+    const firstName = auth.user?.name.trim().split(/\s+/)[0] || 'there';
+
     return (
         <>
             <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
+            <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4 md:p-6">
+                <header className="space-y-1">
+                    <h1 className="text-2xl font-semibold tracking-tight">
+                        Welcome back, {firstName}
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                        Your brand kit, asset library, and recent workspace
+                        activity at a glance.
+                    </p>
+                </header>
+
+                <DashboardStatCards stats={stats} />
+                <DashboardQuickActions
+                    hasBrand={brand !== null}
+                    assetCount={stats.assets}
+                />
+
+                <div className="grid gap-4 lg:grid-cols-2">
+                    <DashboardBrandWidget brand={brand} />
+                    <DashboardTypeBreakdown
+                        assetTypes={assetTypes}
+                        totalAssets={stats.assets}
+                    />
                 </div>
-                <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+
+                <div className="grid gap-4 lg:grid-cols-2">
+                    <DashboardRecentAssets assets={recentAssets} />
+                    <DashboardRecentActivity logs={recentActivity} />
                 </div>
             </div>
         </>

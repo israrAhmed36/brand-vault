@@ -4,6 +4,7 @@ import {
     MoreHorizontal,
     Pencil,
     RotateCcw,
+    Sparkles,
     Trash2,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -30,6 +31,7 @@ export function AssetActions({
     onEdit,
     onDelete,
     onMove,
+    onGenerateTags,
     onRestore,
     onForceDelete,
 }: AssetActionsProps) {
@@ -38,25 +40,6 @@ export function AssetActions({
     );
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const isForceDelete = confirmAction === 'force';
-
-    function handleOpen() {
-        window.open(asset.url, '_blank', 'noopener,noreferrer');
-    }
-
-    function handleConfirm() {
-        if (isForceDelete) {
-            onForceDelete?.(asset);
-        } else {
-            onDelete?.(asset);
-        }
-
-        setIsConfirmOpen(false);
-    }
-
-    function openConfirm(action: 'trash' | 'force') {
-        setConfirmAction(action);
-        setIsConfirmOpen(true);
-    }
 
     return (
         <div data-no-dnd>
@@ -77,8 +60,16 @@ export function AssetActions({
                         <span className="sr-only">Asset actions</span>
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-44">
-                    <DropdownMenuItem onSelect={handleOpen}>
+                <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem
+                        onSelect={() =>
+                            window.open(
+                                asset.url,
+                                '_blank',
+                                'noopener,noreferrer',
+                            )
+                        }
+                    >
                         <ExternalLink className="size-3.5" />
                         Open
                     </DropdownMenuItem>
@@ -93,7 +84,10 @@ export function AssetActions({
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 variant="destructive"
-                                onSelect={() => openConfirm('force')}
+                                onSelect={() => {
+                                    setConfirmAction('force');
+                                    setIsConfirmOpen(true);
+                                }}
                             >
                                 <Trash2 className="size-3.5" />
                                 Delete forever
@@ -101,6 +95,12 @@ export function AssetActions({
                         </>
                     ) : (
                         <>
+                            <DropdownMenuItem
+                                onSelect={() => onGenerateTags?.(asset)}
+                            >
+                                <Sparkles className="size-3.5" />
+                                Generate tags
+                            </DropdownMenuItem>
                             <DropdownMenuItem onSelect={() => onEdit?.(asset)}>
                                 <Pencil className="size-3.5" />
                                 Edit
@@ -111,7 +111,10 @@ export function AssetActions({
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 variant="destructive"
-                                onSelect={() => openConfirm('trash')}
+                                onSelect={() => {
+                                    setConfirmAction('trash');
+                                    setIsConfirmOpen(true);
+                                }}
                             >
                                 <Trash2 className="size-3.5" />
                                 Move to trash
@@ -120,7 +123,6 @@ export function AssetActions({
                     )}
                 </DropdownMenuContent>
             </DropdownMenu>
-
             <ConfirmDialog
                 open={isConfirmOpen}
                 title={isForceDelete ? 'Delete forever?' : 'Move to trash?'}
@@ -130,15 +132,22 @@ export function AssetActions({
                             {asset.name}
                         </span>{' '}
                         {isForceDelete
-                            ? 'will be permanently deleted. This cannot be undone.'
-                            : 'will move to trash. You can restore it later.'}
+                            ? 'will be permanently deleted.'
+                            : 'will move to trash.'}
                     </>
                 }
                 confirmLabel={
                     isForceDelete ? 'Delete forever' : 'Move to trash'
                 }
                 onOpenChange={setIsConfirmOpen}
-                onConfirm={handleConfirm}
+                onConfirm={() => {
+                    if (isForceDelete) {
+                        onForceDelete?.(asset);
+                    } else {
+                        onDelete?.(asset);
+                    }
+                    setIsConfirmOpen(false);
+                }}
             />
         </div>
     );

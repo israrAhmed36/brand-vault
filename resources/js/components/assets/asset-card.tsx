@@ -78,7 +78,18 @@ export function AssetCard(props: AssetCardProps) {
                     <h3 className="truncate text-sm font-semibold tracking-tight text-foreground">
                         {asset.name}
                     </h3>
-                    {updatedLabel ? (
+                    {asset.tags && asset.tags.length > 0 ? (
+                        <p className="mt-1 flex flex-wrap gap-1">
+                            {asset.tags.slice(0, 3).map((tag) => (
+                                <span
+                                    key={tag}
+                                    className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
+                                >
+                                    {tag}
+                                </span>
+                            ))}
+                        </p>
+                    ) : updatedLabel ? (
                         <p className="truncate text-xs text-muted-foreground">
                             Updated {updatedLabel}
                         </p>
