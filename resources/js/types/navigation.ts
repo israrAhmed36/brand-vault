@@ -11,4 +11,6 @@ export type NavItem = {
     href: NonNullable<InertiaLinkProps['href']>;
     icon?: LucideIcon | null;
     isActive?: boolean;
+    /** Path prefixes that keep this item selected (e.g. folder routes). */
+    match?: string[];
 };

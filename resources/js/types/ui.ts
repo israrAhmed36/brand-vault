@@ -13,6 +13,11 @@ export type FlashToast = {
     message: string;
 };
 
+export type AssetsPageShellProps = {
+    sidebar?: ReactNode;
+    children: ReactNode;
+};
+
 export type AuthLayoutProps = {
     children?: ReactNode;
     name?: string;
