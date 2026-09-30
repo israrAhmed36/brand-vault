@@ -72,6 +72,7 @@ class AssetTrashService
             WebhookEvent::AssetRestored,
             $restored->id,
             (string) $user->email,
+            $user->id,
         );
 
         return [

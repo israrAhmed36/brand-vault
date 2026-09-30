@@ -50,6 +50,7 @@ class BrandService
             WebhookEvent::BrandUpdated,
             $brand->id,
             (string) $user->email,
+            $user->id,
         );
 
         return $brand;

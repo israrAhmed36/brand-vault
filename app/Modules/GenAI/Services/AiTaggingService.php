@@ -66,6 +66,7 @@ class AiTaggingService
             WebhookEvent::AssetTagsSaved,
             $updated->id,
             (string) $user->email,
+            $user->id,
         );
 
         return $updated;

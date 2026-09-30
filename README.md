@@ -89,11 +89,39 @@ N8N_WEBHOOK_SECRET=
 
 If `N8N_WEBHOOK_URL` is empty, webhooks are skipped.
 
-### Workflow
+### Workflow (n8n)
+
+Keep the n8n side small: receive → format message → log + email.
 
 1. Import [`n8n/brandvault-webhook.json`](n8n/brandvault-webhook.json) into n8n.
 2. Add Header Auth on the Webhook node for `X-Webhook-Secret` (or validate the header yourself).
-3. Activate the workflow and copy the **production** webhook URL (not `/webhook-test/`).
-4. Set `N8N_WEBHOOK_URL` and `N8N_WEBHOOK_SECRET` on the server (Railway/etc.), then redeploy.
+3. In n8n, create an **SMTP** credential and attach it to the **Send Email** node. Set `fromEmail` / `toEmail` to real addresses.
+4. Activate the workflow and copy the **production** webhook URL (not `/webhook-test/`).
+5. Set `N8N_WEBHOOK_URL` and `N8N_WEBHOOK_SECRET` on the server (Railway/etc.), then redeploy.
 
-Tradeoff: webhooks are fire-and-forget with a 3s timeout. Failures are logged but never block user actions. There is no retry queue by design.
+In n8n, open **Executions** to see each run. Enable “Save successful / error executions” if the list is empty.
+
+### App DB log (`webhook_logs`)
+
+Every attempt is written to Postgres so testers can verify without opening n8n:
+
+| status | Meaning |
+|---|---|
+| `sent` | n8n returned 2xx |
+| `failed` | HTTP error or network timeout |
+| `skipped` | `N8N_WEBHOOK_URL` was empty |
+
+```bash
+php artisan tinker --execute="dump(App\Modules\Webhook\Models\WebhookLog::query()->latest('id')->limit(10)->get(['id','event_type','status','http_status','payload','created_at'])->toArray());"
+```
+
+Or SQL:
+
+```sql
+SELECT id, user_id, event_type, status, http_status, payload, created_at
+FROM webhook_logs
+ORDER BY id DESC
+LIMIT 20;
+```
+
+Tradeoff: webhooks are fire-and-forget with a 3s timeout. Failures never block user actions. There is no retry queue by design.
