@@ -41,4 +41,9 @@ return [
         'brand_logos_bucket' => env('SUPABASE_BRAND_LOGOS_BUCKET', 'brand-logos'),
     ],
 
+    'n8n' => [
+        'webhook_url' => env('N8N_WEBHOOK_URL'),
+        'webhook_secret' => env('N8N_WEBHOOK_SECRET'),
+    ],
+
 ];
