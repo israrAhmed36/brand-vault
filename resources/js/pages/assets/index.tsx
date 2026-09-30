@@ -23,11 +23,12 @@ export default function AssetsIndex() {
     const listPath = page.currentFolder
         ? `/assets/folder/${page.currentFolder.id}`
         : '/assets';
-    const { search, sort, setSearch, setSort } = useAssetsListQuery({
-        listPath,
-        filters: page.filters,
-        syncKey: page.currentFolder?.id ?? 'root',
-    });
+    const { search, sort, addedOn, setSearch, setSort, setAddedOn } =
+        useAssetsListQuery({
+            listPath,
+            filters: page.filters,
+            syncKey: page.currentFolder?.id ?? 'root',
+        });
     const [assetSheetOpen, setAssetSheetOpen] = useState(false);
     const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
     const [movingAsset, setMovingAsset] = useState<Asset | null>(null);
@@ -73,8 +74,10 @@ export default function AssetsIndex() {
                 <SearchSortBar
                     search={search}
                     sort={sort}
+                    addedOn={addedOn}
                     onSearchChange={setSearch}
                     onSortChange={setSort}
+                    onAddedOnChange={setAddedOn}
                 />
                 <AssetTable
                     assets={page.assets.data}

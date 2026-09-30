@@ -19,11 +19,12 @@ export default function AssetsTrash() {
     const { assets, filters } = usePage<AssetsTrashPageProps>().props;
     const { isLoading, error } = useAssetsFiltering();
     const trashSelection = useTrashAssetSelection(assets.data);
-    const { search, sort, setSearch, setSort } = useAssetsListQuery({
-        listPath: '/trash',
-        filters,
-        syncKey: 'trash',
-    });
+    const { search, sort, addedOn, setSearch, setSort, setAddedOn } =
+        useAssetsListQuery({
+            listPath: '/trash',
+            filters,
+            syncKey: 'trash',
+        });
 
     function handleBulkRestore() {
         bulkRestoreAssets([...trashSelection.selectedIds], () => {
@@ -52,8 +53,10 @@ export default function AssetsTrash() {
                 <SearchSortBar
                     search={search}
                     sort={sort}
+                    addedOn={addedOn}
                     onSearchChange={setSearch}
                     onSortChange={setSort}
+                    onAddedOnChange={setAddedOn}
                 />
 
                 <AssetTable

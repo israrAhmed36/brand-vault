@@ -1,4 +1,4 @@
-import { Search, X } from 'lucide-react';
+import { CalendarDays, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -13,13 +13,16 @@ import type { SearchSortBarProps } from '@/types/asset';
 export function SearchSortBar({
     search,
     sort,
+    addedOn,
     onSearchChange,
     onSortChange,
+    onAddedOnChange,
 }: SearchSortBarProps) {
     const hasSearch = search.trim() !== '';
+    const hasAddedOn = addedOn !== '';
 
     return (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
             <div className="relative min-w-0 flex-1">
                 <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -42,13 +45,35 @@ export function SearchSortBar({
                     </Button>
                 ) : null}
             </div>
+            <div className="relative w-full lg:w-48">
+                <CalendarDays className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                    type="date"
+                    value={addedOn}
+                    className="pr-9 pl-9"
+                    aria-label="Filter by date added"
+                    onChange={(event) => onAddedOnChange(event.target.value)}
+                />
+                {hasAddedOn ? (
+                    <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="absolute top-1/2 right-1 size-7 -translate-y-1/2 text-muted-foreground"
+                        aria-label="Clear date added filter"
+                        onClick={() => onAddedOnChange('')}
+                    >
+                        <X className="size-3.5" />
+                    </Button>
+                ) : null}
+            </div>
             <Select
                 value={sort}
                 onValueChange={(value) =>
                     onSortChange(value as SearchSortBarProps['sort'])
                 }
             >
-                <SelectTrigger className="w-full sm:w-48">
+                <SelectTrigger className="w-full lg:w-48">
                     <SelectValue placeholder="Sort" />
                 </SelectTrigger>
                 <SelectContent>

@@ -20,6 +20,7 @@ class ListAssetsRequest extends FormRequest
         return [
             'search' => ['nullable', 'string', 'max:255'],
             'sort' => ['nullable', Rule::in(['updated_desc', 'name_asc'])],
+            'added_on' => ['nullable', 'date', 'date_format:Y-m-d'],
             'page' => ['nullable', 'integer', 'min:1'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
             'folder_id' => ['nullable', 'integer', 'exists:folders,id'],
@@ -27,7 +28,7 @@ class ListAssetsRequest extends FormRequest
     }
 
     /**
-     * @return array{search: string|null, sort: string, page: int, per_page: int}
+     * @return array{search: string|null, sort: string, added_on: string|null, page: int, per_page: int}
      */
     public function listFilters(): array
     {
@@ -38,6 +39,9 @@ class ListAssetsRequest extends FormRequest
         return [
             'search' => $search !== null && $search !== '' ? $search : null,
             'sort' => $this->string('sort', 'updated_desc')->toString(),
+            'added_on' => $this->filled('added_on')
+                ? $this->string('added_on')->toString()
+                : null,
             'page' => $this->integer('page', 1),
             'per_page' => $this->integer('per_page', 20),
         ];

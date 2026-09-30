@@ -114,4 +114,33 @@ class AssetSearchTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page->has('assets.data', 0));
     }
+
+    public function test_assets_index_filters_by_added_on_date(): void
+    {
+        $user = User::factory()->create();
+        $matching = Asset::factory()->create([
+            'user_id' => $user->id,
+            'name' => 'Added today',
+            'folder_id' => null,
+            'created_at' => now()->startOfDay()->addHours(3),
+        ]);
+        Asset::factory()->create([
+            'user_id' => $user->id,
+            'name' => 'Added yesterday',
+            'folder_id' => null,
+            'created_at' => now()->subDay(),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('assets.index', [
+                'added_on' => now()->toDateString(),
+            ]))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('assets/index')
+                ->has('assets.data', 1)
+                ->where('assets.data.0.id', $matching->id)
+                ->where('filters.added_on', now()->toDateString())
+            );
+    }
 }

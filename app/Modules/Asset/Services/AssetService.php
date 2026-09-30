@@ -28,7 +28,7 @@ class AssetService
     }
 
     /**
-     * @param  array{search?: string|null, sort?: string|null, folder_id?: int|null, page?: int|null, per_page?: int|null}  $filters
+     * @param  array{search?: string|null, sort?: string|null, added_on?: string|null, folder_id?: int|null, page?: int|null, per_page?: int|null}  $filters
      * @return LengthAwarePaginator<int, Asset>
      */
     public function list(User $user, array $filters, bool $trashed = false): LengthAwarePaginator

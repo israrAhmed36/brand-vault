@@ -36,6 +36,7 @@ class AssetPageController
             'filters' => [
                 'search' => $filters['search'],
                 'sort' => $filters['sort'],
+                'added_on' => $filters['added_on'],
             ],
             'counts' => $this->assetService->libraryCounts($user),
         ]);
@@ -51,6 +52,7 @@ class AssetPageController
             'filters' => [
                 'search' => $filters['search'],
                 'sort' => $filters['sort'],
+                'added_on' => $filters['added_on'],
             ],
             'counts' => $this->assetService->libraryCounts($user),
         ]);

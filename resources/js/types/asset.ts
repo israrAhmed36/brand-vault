@@ -34,6 +34,7 @@ export type AssetPaginator = {
 export type AssetFilters = {
     search: string | null;
     sort: 'updated_desc' | 'name_asc';
+    added_on: string | null;
 };
 
 export type AssetsIndexPageProps = {
@@ -119,8 +120,10 @@ export type AssetTypeSectionProps = Pick<
 export type SearchSortBarProps = {
     search: string;
     sort: AssetFilters['sort'];
+    addedOn: string;
     onSearchChange: (value: string) => void;
     onSortChange: (value: AssetFilters['sort']) => void;
+    onAddedOnChange: (value: string) => void;
 };
 
 export type AssetsLibraryTab = 'assets' | 'trash';

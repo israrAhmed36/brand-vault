@@ -1,12 +1,9 @@
 import { ImagePlus } from 'lucide-react';
 import { AssetTypeSection } from '@/components/assets/asset-type-section';
 import { TrashBulkToolbar } from '@/components/assets/trash-bulk-toolbar';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-    assetCountLabel,
-    assetGridClassName,
-    groupAssetsByType,
-} from '@/lib/asset-display';
+import { Spinner } from '@/components/ui/spinner';
+import { assetCountLabel, groupAssetsByType } from '@/lib/asset-display';
+import { cn } from '@/lib/utils';
 import type { AssetTableProps } from '@/types/asset';
 
 export function AssetTable({
@@ -33,7 +30,9 @@ export function AssetTable({
                 <h2 className="text-sm font-semibold tracking-tight text-foreground">
                     Assets
                 </h2>
-                {isLoading ? null : (
+                {isLoading ? (
+                    <Spinner className="size-4 text-muted-foreground" />
+                ) : (
                     <p className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground tabular-nums">
                         {assetCountLabel(assets.length)}
                     </p>
@@ -43,7 +42,6 @@ export function AssetTable({
             {trashSelection &&
             onBulkRestoreSelected &&
             onBulkForceDeleteSelected &&
-            !isLoading &&
             assets.length > 0 ? (
                 <TrashBulkToolbar
                     selectedCount={trashSelection.selectedCount}
@@ -61,17 +59,19 @@ export function AssetTable({
                 />
             ) : null}
 
-            <div className="flex-1 p-4 md:p-5">
-                {isLoading ? <AssetCardSkeletons /> : null}
-
-                {!isLoading && assets.length === 0 ? (
+            <div
+                className={cn(
+                    'flex-1 p-4 transition-opacity duration-150 md:p-5',
+                    isLoading && 'opacity-55',
+                )}
+                aria-busy={isLoading}
+            >
+                {assets.length === 0 ? (
                     <AssetEmptyState
                         showRestore={showRestore}
                         searchQuery={activeSearch}
                     />
-                ) : null}
-
-                {!isLoading && assets.length > 0 ? (
+                ) : (
                     <div className="space-y-8">
                         {assetGroups.map((group) => (
                             <AssetTypeSection
@@ -89,28 +89,9 @@ export function AssetTable({
                             />
                         ))}
                     </div>
-                ) : null}
+                )}
             </div>
         </section>
-    );
-}
-
-function AssetCardSkeletons() {
-    return (
-        <div className={assetGridClassName}>
-            {['first', 'second', 'third'].map((key) => (
-                <div
-                    key={key}
-                    className="overflow-hidden rounded-md border border-border bg-card"
-                >
-                    <Skeleton className="aspect-[4/3] w-full rounded-none" />
-                    <div className="space-y-1.5 px-3 py-3">
-                        <Skeleton className="h-4 w-2/3" />
-                        <Skeleton className="h-3 w-1/3" />
-                    </div>
-                </div>
-            ))}
-        </div>
     );
 }
 
@@ -134,7 +115,7 @@ function AssetEmptyState({
             </p>
             <p className="mt-1 max-w-sm text-sm text-muted-foreground">
                 {hasSearch
-                    ? 'Try a different name, or clear the search.'
+                    ? 'Try a different name, clear search, or change the date.'
                     : showRestore
                       ? 'Deleted assets will appear here until you restore or remove them.'
                       : 'Add a file or link. It will show up here as a card.'}

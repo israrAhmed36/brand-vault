@@ -34,6 +34,11 @@ class AssetRepository implements AssetRepositoryInterface
             $query->whereRaw('LOWER(name) LIKE ?', [$needle]);
         }
 
+        $addedOn = $filters['added_on'] ?? null;
+        if (is_string($addedOn) && $addedOn !== '') {
+            $query->whereDate('created_at', $addedOn);
+        }
+
         $sort = $filters['sort'] ?? 'updated_desc';
         if ($sort === 'name_asc') {
             $query->orderBy('name');

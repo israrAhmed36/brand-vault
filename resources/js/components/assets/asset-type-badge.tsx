@@ -16,7 +16,7 @@ export function AssetTypeBadge({ type, overlay = false }: AssetTypeBadgeProps) {
                 'inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase',
                 TYPE_STYLES[type],
                 overlay &&
-                    'border border-white/15 bg-background/85 text-foreground shadow-sm backdrop-blur-md',
+                    'border border-white/5 bg-background/85 text-foreground shadow-sm backdrop-blur-md',
             )}
         >
             {type}
