@@ -7,16 +7,16 @@ import type { DashboardBrandWidgetProps } from '@/types/dashboard';
 
 export function DashboardBrandWidget({ brand }: DashboardBrandWidgetProps) {
     return (
-        <section className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+        <section className="flex h-full flex-col overflow-hidden rounded-xl border border-border/80 bg-card shadow-sm">
             {brand ? (
                 <>
                     <div
-                        className="h-1.5 w-full"
+                        className="h-2 w-full"
                         style={{
                             background: `linear-gradient(90deg, ${brand.primary_color}, ${brand.secondary_color})`,
                         }}
                     />
-                    <div className="flex flex-1 flex-col gap-5 p-5">
+                    <div className="flex flex-1 flex-col gap-5 bg-gradient-to-b from-muted/30 to-card p-5">
                         <div className="flex items-center gap-3">
                             <BrandLogoMark
                                 name={brand.name}
@@ -63,8 +63,8 @@ export function DashboardBrandWidget({ brand }: DashboardBrandWidgetProps) {
                     </div>
                 </>
             ) : (
-                <div className="flex flex-1 flex-col items-start justify-center gap-4 p-5">
-                    <span className="rounded-lg border border-border bg-muted/60 p-2.5 text-muted-foreground">
+                <div className="flex flex-1 flex-col items-start justify-center gap-4 bg-gradient-to-br from-indigo-500/8 via-card to-card p-5">
+                    <span className="rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-2.5 text-indigo-700 dark:text-indigo-300">
                         <SwatchBook className="size-5" />
                     </span>
                     <div className="space-y-1">

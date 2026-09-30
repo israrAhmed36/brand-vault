@@ -8,6 +8,7 @@ import {
 import { useState, type DragEvent } from 'react';
 import { FolderAssetCountBadge } from '@/components/assets/folder-asset-count-badge';
 import { FolderTreeActions } from '@/components/assets/folder-tree-actions';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { isAssetDrag, readAssetDragId } from '@/lib/asset-drag';
 import { assetIndexVisit } from '@/lib/asset-index-visit';
 import { canNestUnderFolder } from '@/lib/folder-depth';
@@ -29,6 +30,7 @@ export function FolderTreeNodeRow(props: FolderTreeNodeRowProps) {
         onDropOnFolder,
         onAssetDrop,
     } = props;
+    const isMobile = useIsMobile();
     const [isOpen, setIsOpen] = useState(true);
     const [isOver, setIsOver] = useState(false);
     const hasChildren = node.children.length > 0;
@@ -73,8 +75,11 @@ export function FolderTreeNodeRow(props: FolderTreeNodeRowProps) {
                     isOver && 'bg-accent ring-1 ring-primary/40',
                 )}
                 style={{ paddingLeft: `${8 + node.depth * 14}px` }}
-                draggable
+                draggable={!isMobile}
                 onDragStart={(event) => {
+                    if (isMobile) {
+                        return;
+                    }
                     event.dataTransfer.setData('text/plain', String(node.id));
                     event.dataTransfer.effectAllowed = 'move';
                     onDragStart(node.id);
@@ -84,7 +89,7 @@ export function FolderTreeNodeRow(props: FolderTreeNodeRowProps) {
                 onDragLeave={() => setIsOver(false)}
                 onDrop={handleDrop}
             >
-                <GripVertical className="size-3.5 shrink-0 cursor-grab text-muted-foreground/70 active:cursor-grabbing" />
+                <GripVertical className="hidden size-3.5 shrink-0 cursor-grab text-muted-foreground/70 active:cursor-grabbing md:block" />
                 {hasChildren ? (
                     <button
                         type="button"

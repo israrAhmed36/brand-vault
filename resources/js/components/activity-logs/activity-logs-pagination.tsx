@@ -53,15 +53,15 @@ export function ActivityLogsPagination({
     }
 
     return (
-        <div className="flex flex-col gap-3 border-t border-border/80 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="shrink-0 space-y-2 border-t border-border/80 bg-card/80 px-3 py-3 backdrop-blur-sm sm:px-4">
             <p className="text-xs text-muted-foreground tabular-nums">
                 {activityLogRangeLabel(currentPage, perPage, total)}
             </p>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-                <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between gap-2">
+                <div className="flex shrink-0 items-center gap-1.5">
                     <span className="text-xs text-muted-foreground">
-                        Rows per page
+                        Per page
                     </span>
                     <Select
                         value={String(perPage)}
@@ -69,7 +69,7 @@ export function ActivityLogsPagination({
                             navigate(1, Number(value) as ActivityLogPerPage);
                         }}
                     >
-                        <SelectTrigger className="h-8 w-[4.5rem]" size="sm">
+                        <SelectTrigger className="h-8 w-[4.25rem]" size="sm">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -82,13 +82,18 @@ export function ActivityLogsPagination({
                     </Select>
                 </div>
 
-                <ActivityLogsPageButtons
-                    currentPage={currentPage}
-                    lastPage={lastPage}
-                    total={total}
-                    pageItems={buildActivityLogPageItems(currentPage, lastPage)}
-                    onNavigate={navigate}
-                />
+                <div className="min-w-0 overflow-x-auto">
+                    <ActivityLogsPageButtons
+                        currentPage={currentPage}
+                        lastPage={lastPage}
+                        total={total}
+                        pageItems={buildActivityLogPageItems(
+                            currentPage,
+                            lastPage,
+                        )}
+                        onNavigate={navigate}
+                    />
+                </div>
             </div>
         </div>
     );

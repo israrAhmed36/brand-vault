@@ -12,12 +12,13 @@ void createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
         switch (true) {
-            case name === 'welcome':
             case name === 'auth/login':
             case name === 'auth/register':
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
+            case name === 'settings/index':
+                return AppLayout;
             case name.startsWith('settings/'):
                 return [AppLayout, SettingsLayout];
             default:

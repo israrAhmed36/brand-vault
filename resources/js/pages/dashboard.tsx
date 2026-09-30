@@ -17,11 +17,11 @@ export default function Dashboard() {
         <>
             <Head title="Dashboard" />
             <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4 md:p-6">
-                <header className="space-y-1">
+                <header className="rounded-xl border border-border/80 bg-gradient-to-r from-primary/8 via-card to-card px-5 py-5 shadow-sm">
                     <h1 className="text-2xl font-semibold tracking-tight">
                         Welcome back, {firstName}
                     </h1>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="mt-1 text-sm text-muted-foreground">
                         Your brand kit, asset library, and recent workspace
                         activity at a glance.
                     </p>

@@ -121,7 +121,7 @@ export function FolderFormSheet({
                         </div>
                     </div>
 
-                    <SheetFooter className="mt-auto shrink-0 flex-row gap-2 border-t border-border bg-background px-6 py-4 sm:justify-end">
+                    <SheetFooter className="mt-auto shrink-0 border-t border-border bg-background px-6 py-4">
                         <Button
                             type="button"
                             variant="outline"

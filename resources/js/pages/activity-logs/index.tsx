@@ -14,8 +14,8 @@ export default function ActivityLogsIndex() {
     return (
         <>
             <Head title="Activity log" />
-            <div className="flex min-h-0 flex-1 flex-col p-4 md:p-6">
-                <section className="flex min-h-[70vh] flex-col overflow-hidden rounded-xl border border-border bg-gradient-to-b from-muted/40 via-background to-background shadow-sm">
+            <div className="flex min-h-0 flex-1 flex-col p-3 md:p-6">
+                <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-gradient-to-b from-muted/40 via-background to-background shadow-sm md:min-h-[70vh] md:rounded-xl">
                     <ActivityLogsToolbar
                         search={search}
                         module={module}

@@ -70,7 +70,13 @@ export function FolderTree({
             </div>
 
             <p className="shrink-0 px-4 pt-3 text-xs leading-relaxed text-muted-foreground">
-                {folderDepthLabel()}. Drag assets onto a folder to move them.
+                <span className="md:hidden">
+                    Tap an asset’s move icon to place it in a folder.
+                </span>
+                <span className="hidden md:inline">
+                    {folderDepthLabel()}. Drag assets onto a folder to move
+                    them.
+                </span>
             </p>
 
             <div className="mt-2 min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-3">

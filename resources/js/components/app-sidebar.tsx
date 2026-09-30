@@ -12,6 +12,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
@@ -40,6 +41,12 @@ const mainNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    const isMobile = useIsMobile();
+
+    if (isMobile) {
+        return null;
+    }
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>

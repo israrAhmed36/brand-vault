@@ -1,20 +1,25 @@
+import { FolderInput } from 'lucide-react';
 import { useState, type DragEvent } from 'react';
 import { AssetActions } from '@/components/assets/asset-actions';
 import { AssetPreview } from '@/components/assets/asset-preview';
 import { AssetTypeBadge } from '@/components/assets/asset-type-badge';
 import { TrashSelectionCheckbox } from '@/components/assets/trash-selection-checkbox';
+import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { setAssetDragData } from '@/lib/asset-drag';
 import { formatAssetDate } from '@/lib/asset-display';
 import { cn } from '@/lib/utils';
 import type { AssetCardProps } from '@/types/asset';
 
 export function AssetCard(props: AssetCardProps) {
-    const { asset, showRestore = false, trashSelection } = props;
+    const { asset, showRestore = false, trashSelection, onMove } = props;
+    const isMobile = useIsMobile();
     const [isDragging, setIsDragging] = useState(false);
     const updatedLabel = formatAssetDate(asset.updated_at);
-    const canDrag = !showRestore;
+    const canDrag = !showRestore && !isMobile;
     const showSelection = showRestore && trashSelection !== undefined;
     const isSelected = trashSelection?.isSelected(asset.id) ?? false;
+    const showMobileMove = Boolean(onMove) && !showRestore;
 
     function handleDragStart(event: DragEvent<HTMLElement>) {
         if (
@@ -46,7 +51,7 @@ export function AssetCard(props: AssetCardProps) {
         >
             <div className="relative">
                 <AssetPreview asset={asset} />
-                <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2">
+                <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-2">
                     {!showSelection ? (
                         <AssetTypeBadge type={asset.type} overlay />
                     ) : (
@@ -54,13 +59,25 @@ export function AssetCard(props: AssetCardProps) {
                             {asset.type}
                         </span>
                     )}
-                    <AssetActions {...props} overlay />
+                    <div className="flex items-center gap-1" data-no-dnd>
+                        {showMobileMove ? (
+                            <Button
+                                type="button"
+                                size="icon"
+                                variant="ghost"
+                                className="size-8 border border-border/70 bg-background/90 text-foreground shadow-sm backdrop-blur-md hover:bg-background md:hidden"
+                                onClick={() => onMove?.(asset)}
+                                aria-label={`Move ${asset.name}`}
+                            >
+                                <FolderInput className="size-4" />
+                            </Button>
+                        ) : null}
+                        <AssetActions {...props} overlay />
+                    </div>
                 </div>
             </div>
             <div
-                className={cn(
-                    'flex items-start gap-2.5 border-t border-border/70 px-3 py-3',
-                )}
+                className="flex items-start gap-2.5 border-t border-border/70 px-3 py-3"
                 data-no-dnd
             >
                 {showSelection ? (
