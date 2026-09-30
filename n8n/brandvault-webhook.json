@@ -1,0 +1,80 @@
+{
+  "name": "BrandVault Webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "brandvault",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-brandvault",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "brandvault"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "message",
+              "name": "message",
+              "value": "={{ $json.body.event }} on {{ $json.body.entity_type }} {{ $json.body.entity_id }} by {{ $json.body.user_email }} at {{ $json.body.timestamp }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-message",
+      "name": "Format Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [280, 0]
+    },
+    {
+      "parameters": {},
+      "id": "noop-log",
+      "name": "Log Execution",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [560, 0]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Format Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Message": {
+      "main": [
+        [
+          {
+            "node": "Log Execution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "brandvault-webhook-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
