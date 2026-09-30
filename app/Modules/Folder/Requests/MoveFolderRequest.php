@@ -45,9 +45,9 @@ class MoveFolderRequest extends FormRequest
                 $folder->id,
             );
 
-            $rule->validate('name', $folder->name, function (string $message) use ($validator): void {
-                $validator->errors()->add('parent_id', $message);
-            });
+            if ($rule->isTaken($folder->name)) {
+                $validator->errors()->add('parent_id', UniqueFolderName::MESSAGE);
+            }
         });
     }
 

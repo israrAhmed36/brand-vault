@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 
 class UniqueFolderName implements ValidationRule
 {
+    public const MESSAGE = 'A folder with this name already exists in this location.';
+
     public function __construct(
         private readonly int $userId,
         private readonly ?int $parentId,
@@ -20,9 +22,16 @@ class UniqueFolderName implements ValidationRule
             return;
         }
 
+        if ($this->isTaken($value)) {
+            $fail(self::MESSAGE);
+        }
+    }
+
+    public function isTaken(string $name): bool
+    {
         $query = DB::table('folders')
             ->where('user_id', $this->userId)
-            ->whereRaw('LOWER(name) = ?', [mb_strtolower(trim($value))]);
+            ->whereRaw('LOWER(name) = ?', [mb_strtolower(trim($name))]);
 
         if ($this->parentId === null) {
             $query->whereNull('parent_id');
@@ -34,8 +43,6 @@ class UniqueFolderName implements ValidationRule
             $query->where('id', '!=', $this->ignoreFolderId);
         }
 
-        if ($query->exists()) {
-            $fail('A folder with this name already exists in this location.');
-        }
+        return $query->exists();
     }
 }
