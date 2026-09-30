@@ -7,8 +7,9 @@ import type { DashboardRecentAssetsProps } from '@/types/dashboard';
 
 export function DashboardRecentAssets({ assets }: DashboardRecentAssetsProps) {
     return (
-        <section className="flex h-full flex-col rounded-xl border border-border bg-card shadow-sm">
-            <header className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
+        <section className="flex h-full flex-col overflow-hidden rounded-xl border border-border/80 bg-card shadow-sm">
+            <div className="h-1 w-full bg-gradient-to-r from-sky-500 via-sky-400 to-teal-400" />
+            <header className="flex items-center justify-between gap-3 border-b border-border/80 bg-sky-500/[0.04] px-5 py-4">
                 <div className="space-y-0.5">
                     <h2 className="text-sm font-semibold tracking-tight">
                         Recent assets
@@ -27,7 +28,7 @@ export function DashboardRecentAssets({ assets }: DashboardRecentAssetsProps) {
 
             {assets.length === 0 ? (
                 <div className="flex flex-1 flex-col items-start justify-center gap-3 p-5">
-                    <span className="rounded-lg border border-border bg-muted/60 p-2 text-muted-foreground">
+                    <span className="rounded-lg border border-sky-500/20 bg-sky-500/10 p-2 text-sky-700 dark:text-sky-300">
                         <FileBox className="size-4" />
                     </span>
                     <p className="text-sm text-muted-foreground">
@@ -38,11 +39,11 @@ export function DashboardRecentAssets({ assets }: DashboardRecentAssetsProps) {
                     </Button>
                 </div>
             ) : (
-                <ul className="divide-y divide-border">
+                <ul className="divide-y divide-border/70">
                     {assets.map((asset) => (
                         <li
                             key={asset.id}
-                            className="flex items-center justify-between gap-3 px-5 py-3"
+                            className="flex items-center justify-between gap-3 px-5 py-3 transition-colors hover:bg-muted/30"
                         >
                             <div className="min-w-0 space-y-1">
                                 <p className="truncate text-sm font-medium">

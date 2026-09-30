@@ -6,18 +6,27 @@ import {
     Trash2,
     type LucideIcon,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import type {
     DashboardStatCardItem,
     DashboardStatCardsProps,
 } from '@/types/dashboard';
 
-const STAT_ITEMS: Omit<DashboardStatCardItem, 'value'>[] = [
+const STAT_ITEMS: Array<
+    Omit<DashboardStatCardItem, 'value'> & {
+        tone: string;
+        iconTone: string;
+    }
+> = [
     {
         key: 'assets',
         label: 'Assets',
         hint: 'Active in your library',
         href: '/assets',
         icon: 'assets',
+        tone: 'from-sky-500/12 via-card to-card',
+        iconTone:
+            'border-sky-500/20 bg-sky-500/10 text-sky-700 dark:text-sky-300',
     },
     {
         key: 'folders',
@@ -25,6 +34,9 @@ const STAT_ITEMS: Omit<DashboardStatCardItem, 'value'>[] = [
         hint: 'Organization depth ≤ 2',
         href: '/assets',
         icon: 'folders',
+        tone: 'from-emerald-500/12 via-card to-card',
+        iconTone:
+            'border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
     },
     {
         key: 'trash',
@@ -32,6 +44,9 @@ const STAT_ITEMS: Omit<DashboardStatCardItem, 'value'>[] = [
         hint: 'Soft-deleted assets',
         href: '/trash',
         icon: 'trash',
+        tone: 'from-rose-500/12 via-card to-card',
+        iconTone:
+            'border-rose-500/20 bg-rose-500/10 text-rose-700 dark:text-rose-300',
     },
     {
         key: 'untagged',
@@ -39,6 +54,9 @@ const STAT_ITEMS: Omit<DashboardStatCardItem, 'value'>[] = [
         hint: 'Ready for AI tagging',
         href: '/assets',
         icon: 'untagged',
+        tone: 'from-amber-500/12 via-card to-card',
+        iconTone:
+            'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-300',
     },
 ];
 
@@ -59,7 +77,11 @@ export function DashboardStatCards({ stats }: DashboardStatCardsProps) {
                     <Link
                         key={item.key}
                         href={item.href}
-                        className="group rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-foreground/15 hover:bg-muted/40"
+                        className={cn(
+                            'group rounded-xl border border-border/80 bg-gradient-to-br p-4 shadow-sm transition duration-200',
+                            'hover:-translate-y-0.5 hover:border-border hover:shadow-md',
+                            item.tone,
+                        )}
                     >
                         <div className="flex items-start justify-between gap-3">
                             <div className="space-y-1">
@@ -70,7 +92,12 @@ export function DashboardStatCards({ stats }: DashboardStatCardsProps) {
                                     {stats[item.key]}
                                 </p>
                             </div>
-                            <span className="rounded-lg border border-border bg-muted/60 p-2 text-muted-foreground transition-colors group-hover:text-foreground">
+                            <span
+                                className={cn(
+                                    'rounded-lg border p-2 shadow-xs transition-transform group-hover:scale-105',
+                                    item.iconTone,
+                                )}
+                            >
                                 <Icon className="size-4" />
                             </span>
                         </div>

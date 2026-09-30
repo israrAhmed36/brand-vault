@@ -116,7 +116,7 @@ export function BrandFormSheet({
                         onLogoClear={handleLogoClear}
                     />
 
-                    <SheetFooter className="mt-auto flex-row gap-2 border-t border-border px-0 pt-4 pb-0 sm:justify-end">
+                    <SheetFooter className="mt-auto border-t border-border px-0 pt-4 pb-0">
                         <Button
                             type="button"
                             variant="outline"

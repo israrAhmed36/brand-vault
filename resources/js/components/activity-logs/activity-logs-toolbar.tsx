@@ -32,22 +32,27 @@ export function ActivityLogsToolbar({
     onActionChange,
 }: ActivityLogsToolbarProps) {
     return (
-        <div className="flex flex-col gap-3 border-b border-border/80 bg-card/70 px-4 py-4 backdrop-blur-sm md:flex-row md:items-end md:justify-between">
-            <div>
-                <h1 className="text-xl font-semibold tracking-tight text-foreground">
-                    Activity log
-                </h1>
-                <p className="mt-1 text-sm text-muted-foreground">
-                    Audit trail of brand, folder, and asset changes.
+        <div className="shrink-0 space-y-3 border-b border-border/80 bg-card/70 px-4 py-4 backdrop-blur-sm">
+            <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                    <h1 className="text-lg font-semibold tracking-tight text-foreground md:text-xl">
+                        Activity log
+                    </h1>
+                    <p className="mt-1 hidden text-sm text-muted-foreground sm:block">
+                        Audit trail of brand, folder, and asset changes.
+                    </p>
+                </div>
+                <p className="shrink-0 rounded-md bg-muted px-2.5 py-1.5 text-xs font-medium text-muted-foreground tabular-nums">
+                    {total} {total === 1 ? 'event' : 'events'}
                 </p>
             </div>
 
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center">
                 <Input
                     value={search}
                     onChange={(event) => onSearchChange(event.target.value)}
-                    placeholder="Search subject, module, action…"
-                    className="sm:w-64"
+                    placeholder="Search…"
+                    className="col-span-2 md:w-64"
                 />
                 <Select
                     value={module || 'all'}
@@ -55,7 +60,7 @@ export function ActivityLogsToolbar({
                         onModuleChange(value === 'all' ? '' : value)
                     }
                 >
-                    <SelectTrigger className="sm:w-36">
+                    <SelectTrigger className="w-full md:w-36">
                         <SelectValue placeholder="Module" />
                     </SelectTrigger>
                     <SelectContent>
@@ -73,7 +78,7 @@ export function ActivityLogsToolbar({
                         onActionChange(value === 'all' ? '' : value)
                     }
                 >
-                    <SelectTrigger className="sm:w-40">
+                    <SelectTrigger className="w-full md:w-40">
                         <SelectValue placeholder="Action" />
                     </SelectTrigger>
                     <SelectContent>
@@ -85,9 +90,6 @@ export function ActivityLogsToolbar({
                         ))}
                     </SelectContent>
                 </Select>
-                <p className="rounded-md bg-muted px-2.5 py-1.5 text-xs font-medium text-muted-foreground tabular-nums">
-                    {total} {total === 1 ? 'event' : 'events'}
-                </p>
             </div>
         </div>
     );

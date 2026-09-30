@@ -4,6 +4,7 @@ import {
     activityLogsColumns,
     type ActivityLogsTableMeta,
 } from '@/components/activity-logs/activity-logs-columns';
+import { ActivityLogsMobileList } from '@/components/activity-logs/activity-logs-mobile-list';
 import type { ActivityLog } from '@/types/activity-log';
 
 type ActivityLogsDataTableProps = {
@@ -40,48 +41,53 @@ export function ActivityLogsDataTable({
     }
 
     return (
-        <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] border-collapse text-left">
-                <thead className="border-b border-border bg-muted/40">
-                    {table.getHeaderGroups().map((headerGroup) => (
-                        <tr key={headerGroup.id}>
-                            {headerGroup.headers.map((header) => (
-                                <th
-                                    key={header.id}
-                                    className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase"
-                                >
-                                    {header.isPlaceholder
-                                        ? null
-                                        : flexRender(
-                                              header.column.columnDef.header,
-                                              header.getContext(),
-                                          )}
-                                </th>
-                            ))}
-                        </tr>
-                    ))}
-                </thead>
-                <tbody>
-                    {table.getRowModel().rows.map((row) => (
-                        <tr
-                            key={row.id}
-                            className="border-b border-border/70 transition-colors hover:bg-muted/30"
-                        >
-                            {row.getVisibleCells().map((cell) => (
-                                <td
-                                    key={cell.id}
-                                    className="px-4 py-3 align-top"
-                                >
-                                    {flexRender(
-                                        cell.column.columnDef.cell,
-                                        cell.getContext(),
-                                    )}
-                                </td>
-                            ))}
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+        <>
+            <ActivityLogsMobileList logs={logs} page={page} perPage={perPage} />
+
+            <div className="hidden overflow-x-auto md:block">
+                <table className="w-full min-w-[760px] border-collapse text-left">
+                    <thead className="border-b border-border bg-muted/40">
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <tr key={headerGroup.id}>
+                                {headerGroup.headers.map((header) => (
+                                    <th
+                                        key={header.id}
+                                        className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+                                    >
+                                        {header.isPlaceholder
+                                            ? null
+                                            : flexRender(
+                                                  header.column.columnDef
+                                                      .header,
+                                                  header.getContext(),
+                                              )}
+                                    </th>
+                                ))}
+                            </tr>
+                        ))}
+                    </thead>
+                    <tbody>
+                        {table.getRowModel().rows.map((row) => (
+                            <tr
+                                key={row.id}
+                                className="border-b border-border/70 transition-colors hover:bg-muted/30"
+                            >
+                                {row.getVisibleCells().map((cell) => (
+                                    <td
+                                        key={cell.id}
+                                        className="px-4 py-3 align-top"
+                                    >
+                                        {flexRender(
+                                            cell.column.columnDef.cell,
+                                            cell.getContext(),
+                                        )}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </>
     );
 }
