@@ -9,6 +9,8 @@ use App\Modules\ActivityLog\Services\ActivityLogService;
 use App\Modules\ActivityLog\Support\ActivitySnapshot;
 use App\Modules\Brand\Models\Brand;
 use App\Modules\Brand\Repositories\BrandRepositoryInterface;
+use App\Modules\Webhook\Enums\WebhookEvent;
+use App\Modules\Webhook\Services\WebhookNotifier;
 use Illuminate\Auth\Access\AuthorizationException;
 
 class BrandService
@@ -16,6 +18,7 @@ class BrandService
     public function __construct(
         private readonly BrandRepositoryInterface $brands,
         private readonly ActivityLogService $activityLogs,
+        private readonly WebhookNotifier $webhooks,
     ) {}
 
     public function forUser(User $user): ?Brand
@@ -41,6 +44,13 @@ class BrandService
             $oldValues,
             ActivitySnapshot::brand($brand),
             $brand->name,
+        );
+
+        $this->webhooks->send(
+            WebhookEvent::BrandUpdated,
+            $brand->id,
+            (string) $user->email,
+            $user->id,
         );
 
         return $brand;

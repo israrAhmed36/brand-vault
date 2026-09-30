@@ -1,0 +1,110 @@
+{
+    "name": "BrandVault Webhook",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "brandvault",
+                "responseMode": "onReceived",
+                "options": {}
+            },
+            "id": "webhook-brandvault",
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [0, 0],
+            "webhookId": "brandvault"
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "message",
+                            "name": "message",
+                            "value": "={{ ($json.body || $json).event }} on {{ ($json.body || $json).entity_type }} {{ ($json.body || $json).entity_id }} by {{ ($json.body || $json).user_email }} at {{ ($json.body || $json).timestamp }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "subject",
+                            "name": "subject",
+                            "value": "={{ 'BrandVault: ' + (($json.body || $json).event || 'webhook') }}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "set-message",
+            "name": "Format Message",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [280, 0]
+        },
+        {
+            "parameters": {},
+            "id": "noop-log",
+            "name": "Log Execution",
+            "type": "n8n-nodes-base.noOp",
+            "typeVersion": 1,
+            "position": [560, -120],
+            "notes": "Keeps a clear step in Executions history."
+        },
+        {
+            "parameters": {
+                "fromEmail": "FROM_EMAIL_HERE",
+                "toEmail": "TO_EMAIL_HERE",
+                "subject": "={{ $json.subject }}",
+                "emailType": "text",
+                "message": "={{ $json.message }}",
+                "options": {}
+            },
+            "id": "email-notify",
+            "name": "Send Email",
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 2.1,
+            "position": [560, 120],
+            "notes": "Replace FROM_EMAIL_HERE / TO_EMAIL_HERE and attach your own SMTP credential in n8n."
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Format Message",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Message": {
+            "main": [
+                [
+                    {
+                        "node": "Log Execution",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Send Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": false,
+    "settings": {
+        "executionOrder": "v1",
+        "saveDataSuccessExecution": "all",
+        "saveDataErrorExecution": "all"
+    },
+    "versionId": "brandvault-webhook-v4",
+    "meta": {
+        "templateCredsSetupCompleted": false
+    },
+    "tags": []
+}

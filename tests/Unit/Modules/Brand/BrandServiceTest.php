@@ -7,6 +7,7 @@ use App\Modules\ActivityLog\Services\ActivityLogService;
 use App\Modules\Brand\Models\Brand;
 use App\Modules\Brand\Repositories\BrandRepositoryInterface;
 use App\Modules\Brand\Services\BrandService;
+use App\Modules\Webhook\Services\WebhookNotifier;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
@@ -37,7 +38,10 @@ class BrandServiceTest extends TestCase
         $activityLogs = Mockery::mock(ActivityLogService::class);
         $activityLogs->shouldReceive('record')->once();
 
-        $service = new BrandService($repository, $activityLogs);
+        $webhooks = Mockery::mock(WebhookNotifier::class);
+        $webhooks->shouldReceive('send')->once();
+
+        $service = new BrandService($repository, $activityLogs, $webhooks);
         $result = $service->upsert($user, [
             'name' => 'Delegated',
             'primary_color' => '#111111',
@@ -57,7 +61,10 @@ class BrandServiceTest extends TestCase
         $activityLogs = Mockery::mock(ActivityLogService::class);
         $activityLogs->shouldNotReceive('record');
 
-        $service = new BrandService($repository, $activityLogs);
+        $webhooks = Mockery::mock(WebhookNotifier::class);
+        $webhooks->shouldNotReceive('send');
+
+        $service = new BrandService($repository, $activityLogs, $webhooks);
 
         $this->expectException(AuthorizationException::class);
         $service->delete($user);
