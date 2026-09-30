@@ -95,7 +95,7 @@ Keep the n8n side small: receive → format message → log + email.
 
 1. Import [`n8n/brandvault-webhook.json`](n8n/brandvault-webhook.json) into n8n.
 2. Add Header Auth on the Webhook node for `X-Webhook-Secret` (or validate the header yourself).
-3. In n8n, create an **SMTP** credential and attach it to the **Send Email** node. Set `fromEmail` / `toEmail` to real addresses.
+3. In n8n, create an **SMTP** credential and attach it to the **Send Email** node. Replace placeholders `FROM_EMAIL_HERE` / `TO_EMAIL_HERE` with your addresses.
 4. Activate the workflow and copy the **production** webhook URL (not `/webhook-test/`).
 5. Set `N8N_WEBHOOK_URL` and `N8N_WEBHOOK_SECRET` on the server (Railway/etc.), then redeploy.
 

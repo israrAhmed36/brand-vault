@@ -1,16 +1,18 @@
 {
+    "name": "BrandVault Webhook",
     "nodes": [
         {
             "parameters": {
                 "httpMethod": "POST",
                 "path": "brandvault",
+                "responseMode": "onReceived",
                 "options": {}
             },
-            "id": "05961085-7f20-43ae-964c-7656510358a2",
+            "id": "webhook-brandvault",
             "name": "Webhook",
             "type": "n8n-nodes-base.webhook",
             "typeVersion": 2,
-            "position": [-256, 128],
+            "position": [0, 0],
             "webhookId": "brandvault"
         },
         {
@@ -33,41 +35,36 @@
                 },
                 "options": {}
             },
-            "id": "dc4c3aef-7cc7-4042-bbeb-f8ab687ebfeb",
+            "id": "set-message",
             "name": "Format Message",
             "type": "n8n-nodes-base.set",
             "typeVersion": 3.4,
-            "position": [32, 128]
+            "position": [280, 0]
         },
         {
             "parameters": {},
-            "id": "434f2a89-c784-44d8-a5de-1f88f8596ebf",
+            "id": "noop-log",
             "name": "Log Execution",
             "type": "n8n-nodes-base.noOp",
             "typeVersion": 1,
-            "position": [304, 0],
+            "position": [560, -120],
             "notes": "Keeps a clear step in Executions history."
         },
         {
             "parameters": {
-                "fromEmail": "automations@nordicbh.com",
-                "toEmail": "isr4r.ahm3d@gmail.com",
+                "fromEmail": "FROM_EMAIL_HERE",
+                "toEmail": "TO_EMAIL_HERE",
                 "subject": "={{ $json.subject }}",
+                "emailType": "text",
+                "message": "={{ $json.message }}",
                 "options": {}
             },
-            "id": "53b72309-459c-43d7-9f16-1c8b9859ec67",
+            "id": "email-notify",
             "name": "Send Email",
             "type": "n8n-nodes-base.emailSend",
             "typeVersion": 2.1,
-            "position": [304, 240],
-            "webhookId": "eeca13f0-b511-4889-a255-9573583fee6c",
-            "credentials": {
-                "smtp": {
-                    "id": "XHu3YOscAHKDa2gw",
-                    "name": "SMTP account 4"
-                }
-            },
-            "notes": "Set SMTP credentials in n8n, then change fromEmail/toEmail."
+            "position": [560, 120],
+            "notes": "Replace FROM_EMAIL_HERE / TO_EMAIL_HERE and attach your own SMTP credential in n8n."
         }
     ],
     "connections": {
@@ -99,9 +96,15 @@
             ]
         }
     },
-    "pinData": {},
+    "active": false,
+    "settings": {
+        "executionOrder": "v1",
+        "saveDataSuccessExecution": "all",
+        "saveDataErrorExecution": "all"
+    },
+    "versionId": "brandvault-webhook-v4",
     "meta": {
-        "templateCredsSetupCompleted": true,
-        "instanceId": "ddefe5320304908fb508b0005b540a4e51f0455b433054989f465161f365c0ca"
-    }
+        "templateCredsSetupCompleted": false
+    },
+    "tags": []
 }
