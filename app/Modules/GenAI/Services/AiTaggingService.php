@@ -13,6 +13,8 @@ use App\Modules\Brand\Repositories\BrandRepositoryInterface;
 use App\Modules\GenAI\Contracts\AiProviderInterface;
 use App\Modules\GenAI\Support\AiResponseValidator;
 use App\Modules\GenAI\Support\AssetTaggingPromptBuilder;
+use App\Modules\Webhook\Enums\WebhookEvent;
+use App\Modules\Webhook\Services\WebhookNotifier;
 
 class AiTaggingService
 {
@@ -23,6 +25,7 @@ class AiTaggingService
         private readonly BrandRepositoryInterface $brands,
         private readonly AssetRepositoryInterface $assets,
         private readonly ActivityLogService $activityLogs,
+        private readonly WebhookNotifier $webhooks,
     ) {}
 
     /**
@@ -57,6 +60,12 @@ class AiTaggingService
             $oldValues,
             ActivitySnapshot::asset($updated),
             $updated->name,
+        );
+
+        $this->webhooks->send(
+            WebhookEvent::AssetTagsSaved,
+            $updated->id,
+            (string) $user->email,
         );
 
         return $updated;

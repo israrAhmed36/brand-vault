@@ -10,6 +10,8 @@ use App\Modules\ActivityLog\Support\ActivitySnapshot;
 use App\Modules\Asset\Models\Asset;
 use App\Modules\Asset\Repositories\AssetRepositoryInterface;
 use App\Modules\Folder\Repositories\FolderRepositoryInterface;
+use App\Modules\Webhook\Enums\WebhookEvent;
+use App\Modules\Webhook\Services\WebhookNotifier;
 
 class AssetTrashService
 {
@@ -17,6 +19,7 @@ class AssetTrashService
         private readonly AssetRepositoryInterface $assets,
         private readonly FolderRepositoryInterface $folders,
         private readonly ActivityLogService $activityLogs,
+        private readonly WebhookNotifier $webhooks,
     ) {}
 
     public function softDelete(User $user, Asset $asset): void
@@ -63,6 +66,12 @@ class AssetTrashService
             $oldValues,
             ActivitySnapshot::asset($restored),
             $restored->name,
+        );
+
+        $this->webhooks->send(
+            WebhookEvent::AssetRestored,
+            $restored->id,
+            (string) $user->email,
         );
 
         return [
