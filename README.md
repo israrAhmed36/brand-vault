@@ -57,21 +57,21 @@ Outbound, fire-and-forget notifications to n8n when key events succeed. Failures
 
 ### Events
 
-| Event | When |
-|---|---|
+| Event              | When                                   |
+| ------------------ | -------------------------------------- |
 | `asset.tags_saved` | Reviewed AI tags are saved on an asset |
-| `asset.restored` | An asset is restored from trash |
-| `brand.updated` | Brand kit is created or updated |
+| `asset.restored`   | An asset is restored from trash        |
+| `brand.updated`    | Brand kit is created or updated        |
 
 ### Payload
 
 ```json
 {
-  "event": "asset.restored",
-  "entity_type": "asset",
-  "entity_id": "42",
-  "user_email": "demo@brandvault.dev",
-  "timestamp": "2026-09-30T10:15:00.000Z"
+    "event": "asset.restored",
+    "entity_type": "asset",
+    "entity_id": "42",
+    "user_email": "demo@brandvault.dev",
+    "timestamp": "2026-09-30T10:15:00.000Z"
 }
 ```
 
@@ -105,11 +105,11 @@ In n8n, open **Executions** to see each run. Enable “Save successful / error e
 
 Every attempt is written to Postgres so testers can verify without opening n8n:
 
-| status | Meaning |
-|---|---|
-| `sent` | n8n returned 2xx |
-| `failed` | HTTP error or network timeout |
-| `skipped` | `N8N_WEBHOOK_URL` was empty |
+| status    | Meaning                       |
+| --------- | ----------------------------- |
+| `sent`    | n8n returned 2xx              |
+| `failed`  | HTTP error or network timeout |
+| `skipped` | `N8N_WEBHOOK_URL` was empty   |
 
 ```bash
 php artisan tinker --execute="dump(App\Modules\Webhook\Models\WebhookLog::query()->latest('id')->limit(10)->get(['id','event_type','status','http_status','payload','created_at'])->toArray());"
