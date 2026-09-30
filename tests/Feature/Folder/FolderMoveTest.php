@@ -94,4 +94,37 @@ class FolderMoveTest extends TestCase
                 ->has('folders', 2)
             );
     }
+
+    public function test_cannot_move_into_parent_with_same_sibling_name(): void
+    {
+        $user = User::factory()->create();
+        $parent = Folder::factory()->create([
+            'user_id' => $user->id,
+            'name' => 'Parent',
+            'depth' => 0,
+        ]);
+        Folder::factory()->create([
+            'user_id' => $user->id,
+            'parent_id' => $parent->id,
+            'name' => 'Shared',
+            'depth' => 1,
+        ]);
+        $siblingRoot = Folder::factory()->create([
+            'user_id' => $user->id,
+            'name' => 'Shared',
+            'depth' => 0,
+        ]);
+
+        $this->actingAs($user)
+            ->from(route('assets.index'))
+            ->put(route('folders.move', $siblingRoot), ['parent_id' => $parent->id])
+            ->assertRedirect(route('assets.index'))
+            ->assertSessionHasErrors('parent_id');
+
+        $this->assertDatabaseHas('folders', [
+            'id' => $siblingRoot->id,
+            'parent_id' => null,
+            'depth' => 0,
+        ]);
+    }
 }

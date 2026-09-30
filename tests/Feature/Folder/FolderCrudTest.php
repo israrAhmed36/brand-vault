@@ -82,4 +82,70 @@ class FolderCrudTest extends TestCase
             ])
             ->assertSessionHasErrors('parent_id');
     }
+
+    public function test_user_cannot_create_duplicate_sibling_folder_name(): void
+    {
+        $user = User::factory()->create();
+        Folder::factory()->create([
+            'user_id' => $user->id,
+            'name' => 'Campaigns',
+            'parent_id' => null,
+        ]);
+
+        $this->actingAs($user)
+            ->from(route('assets.index'))
+            ->post(route('folders.store'), ['name' => 'campaigns'])
+            ->assertRedirect(route('assets.index'))
+            ->assertSessionHasErrors('name');
+    }
+
+    public function test_user_can_reuse_folder_name_under_different_parent(): void
+    {
+        $user = User::factory()->create();
+        $parent = Folder::factory()->create([
+            'user_id' => $user->id,
+            'name' => 'Root',
+            'depth' => 0,
+        ]);
+        Folder::factory()->create([
+            'user_id' => $user->id,
+            'name' => 'Assets',
+            'parent_id' => null,
+            'depth' => 0,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('folders.store'), [
+                'name' => 'Assets',
+                'parent_id' => $parent->id,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('folders', [
+            'user_id' => $user->id,
+            'name' => 'Assets',
+            'parent_id' => $parent->id,
+        ]);
+    }
+
+    public function test_user_cannot_rename_folder_to_sibling_name(): void
+    {
+        $user = User::factory()->create();
+        Folder::factory()->create([
+            'user_id' => $user->id,
+            'name' => 'Campaigns',
+            'parent_id' => null,
+        ]);
+        $folder = Folder::factory()->create([
+            'user_id' => $user->id,
+            'name' => 'Archive',
+            'parent_id' => null,
+        ]);
+
+        $this->actingAs($user)
+            ->from(route('assets.index'))
+            ->put(route('folders.update', $folder), ['name' => 'Campaigns'])
+            ->assertRedirect(route('assets.index'))
+            ->assertSessionHasErrors('name');
+    }
 }

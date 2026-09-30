@@ -2,6 +2,7 @@
 
 namespace App\Modules\Folder\Requests;
 
+use App\Modules\Folder\Rules\UniqueFolderName;
 use App\Shared\Rules\BelongsToCurrentUser;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -18,7 +19,15 @@ class CreateFolderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                new UniqueFolderName(
+                    (int) $this->user()->id,
+                    $this->resolvedParentId(),
+                ),
+            ],
             'parent_id' => [
                 'nullable',
                 'integer',
@@ -35,9 +44,14 @@ class CreateFolderRequest extends FormRequest
     {
         return [
             'name' => $this->string('name')->toString(),
-            'parent_id' => $this->filled('parent_id')
-                ? $this->integer('parent_id')
-                : null,
+            'parent_id' => $this->resolvedParentId(),
         ];
+    }
+
+    private function resolvedParentId(): ?int
+    {
+        return $this->filled('parent_id')
+            ? $this->integer('parent_id')
+            : null;
     }
 }

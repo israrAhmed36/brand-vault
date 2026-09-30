@@ -11,11 +11,10 @@ export function trashAsset(asset: Asset): void {
 }
 
 export function deleteFolder(folder: Folder): void {
-    if (!window.confirm(`Delete folder “${folder.name}”?`)) {
-        return;
-    }
-
-    router.delete(`/folders/${folder.id}`, { preserveScroll: true });
+    router.delete(`/folders/${folder.id}`, {
+        preserveScroll: true,
+        onError: () => toast.error('Could not delete folder.'),
+    });
 }
 
 export function moveFolder(folderId: number, parentId: number | null): void {

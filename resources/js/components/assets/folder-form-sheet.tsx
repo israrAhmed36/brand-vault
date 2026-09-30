@@ -72,8 +72,11 @@ export function FolderFormSheet({
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent side="right" className="w-full p-0 sm:max-w-md">
-                <SheetHeader className="border-b border-border px-6 pt-6 pr-14 pb-5">
+            <SheetContent
+                side="right"
+                className="flex h-full w-full flex-col gap-0 p-0 sm:max-w-md"
+            >
+                <SheetHeader className="shrink-0 border-b border-border px-6 pt-6 pr-14 pb-5">
                     <SheetTitle>
                         {isEditing
                             ? 'Rename folder'
@@ -92,31 +95,33 @@ export function FolderFormSheet({
 
                 <form
                     onSubmit={handleSubmit}
-                    className="flex flex-col gap-6 px-6 py-6"
+                    className="flex min-h-0 flex-1 flex-col"
                 >
-                    <div className="grid gap-2">
-                        <Label htmlFor="folder-name">Name</Label>
-                        <Input
-                            id="folder-name"
-                            value={form.data.name}
-                            onChange={(event) =>
-                                form.setData('name', event.target.value)
-                            }
-                            placeholder="Campaigns"
-                        />
-                        {form.errors.name ? (
-                            <p className="text-sm text-destructive">
-                                {form.errors.name}
-                            </p>
-                        ) : null}
-                        {form.errors.parent_id ? (
-                            <p className="text-sm text-destructive">
-                                {form.errors.parent_id}
-                            </p>
-                        ) : null}
+                    <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-6 py-6">
+                        <div className="grid gap-2">
+                            <Label htmlFor="folder-name">Name</Label>
+                            <Input
+                                id="folder-name"
+                                value={form.data.name}
+                                onChange={(event) =>
+                                    form.setData('name', event.target.value)
+                                }
+                                placeholder="Campaigns"
+                            />
+                            {form.errors.name ? (
+                                <p className="text-sm text-destructive">
+                                    {form.errors.name}
+                                </p>
+                            ) : null}
+                            {form.errors.parent_id ? (
+                                <p className="text-sm text-destructive">
+                                    {form.errors.parent_id}
+                                </p>
+                            ) : null}
+                        </div>
                     </div>
 
-                    <SheetFooter className="flex-row gap-2 sm:justify-end">
+                    <SheetFooter className="mt-auto shrink-0 flex-row gap-2 border-t border-border bg-background px-6 py-4 sm:justify-end">
                         <Button
                             type="button"
                             variant="outline"
